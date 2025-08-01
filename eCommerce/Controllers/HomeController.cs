@@ -17,7 +17,11 @@ namespace eCommerce.Controllers
             _logger = logger;
             _context = context;
         }
-
+       
+        /// <summary>
+        /// Anasayfaya verileri ve bunlarý mapler 
+        /// </summary>
+        /// <returns></returns>
         public IActionResult Index()
         {
             var categories = _context.Categories.ToList();
