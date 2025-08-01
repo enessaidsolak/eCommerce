@@ -1,0 +1,16 @@
+﻿@model eCommerce.DATA.Models.ProductModel
+
+<h2>Ürün Listesi</h2>
+
+<div class="row">
+    @foreach (var product in Model.Products)
+    {
+        <div class="col-md-4">
+            <h4>@product.ProductName</h4>
+            <p>Kategori: @product.Category?.CategoryName</p>
+            <img src="@product.ImageUrl" alt="@product.ProductName" style="width:100%; height:auto;" />
+            <p>Fiyat: @product.Price ₺</p>
+            <a href="@Url.Action("Details", "Product", new { idOrName = product.ProductId })">Detay</a>
+        </div>
+    }
+</div>
