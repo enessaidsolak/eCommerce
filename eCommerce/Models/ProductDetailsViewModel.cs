@@ -8,6 +8,7 @@ namespace eCommerce.DATA.Models
         public Product Product { get; set; }
         public List<Product> FeaturedProducts { get; set; }
         public List<Category>FeaturedCategory { get; set; }
+        public List<ProductComment> ProductComments { get; set; } 
 
     }
     

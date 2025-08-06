@@ -1,0 +1,181 @@
+﻿@model List<CartItemModel>
+
+<!-- Single Page Header start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Cart</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="#">Pages</a></li>
+        <li class="breadcrumb-item active text-white">Cart</li>
+    </ol>
+</div>
+<!-- Single Page Header End -->
+<!-- Cart Page Start -->
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col">Products</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Price (₺)</th>
+                        <th scope="col">Quantity</th>
+                        <th scope="col">Total (₺)</th>
+                        <th scope="col">Handle</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr data-product-id="@item.ProductId">
+                            <th scope="row">
+                                <div class="d-flex align-items-center">
+                                    <a href="@Url.Action("Index", "Home", new { idOrName = item.ProductId })">
+                                        <div class="fruite-img">
+                                            <img src="@item.ImageUrl" class="img-fluid w-75 rounded-top" alt="@item.ProductName">
+                                        </div>
+                                    </a>
+                                </div>
+                            </th>
+                            <td>
+                                <p class="mb-0 mt-4">@item.Name</p>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4 price-text">@item.Price.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
+                            </td>
+                            <td>
+                                <div class="input-group quantity mt-4" style="width: 100px;" data-product-id="@item.ProductId">
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                            <i class="fa fa-minus"></i>
+                                        </button>
+                                    </div>
+                                    <input type="text" class="form-control form-control-sm text-center border-0 quantity-input" value="@item.Quantity" readonly>
+                                    <div class="input-group-btn">
+                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                            <i class="fa fa-plus"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0 mt-4 item-total-price">
+                                    @((item.Price * item.Quantity).ToString("C", new System.Globalization.CultureInfo("tr-TR")))
+                                </p>
+                            </td>
+                            <td>
+                                <button class="btn btn-md rounded-circle bg-light border mt-4 btn-remove-item" title="Remove item">
+                                    <i class="fa fa-times text-danger"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-5">
+            <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+            <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
+        </div>
+
+        <div class="row g-4 justify-content-end">
+            <div class="col-8"></div>
+            <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
+                <div class="bg-light rounded">
+                    <div class="p-4">
+                        <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                        <div class="d-flex justify-content-between mb-4">
+                            <h5 class="mb-0 me-4">Subtotal:</h5>
+                            <p class="mb-0 subtotal-price">@Model.Sum(x => x.Price * x.Quantity).ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-0 me-4">Shipping</h5>
+                            <div class="">
+                                <p class="mb-0">Flat rate: ₺3,00</p>
+                            </div>
+                        </div>
+                        <p class="mb-0 text-end">Shipping to Ukraine.</p>
+                    </div>
+                    <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
+                        <h5 class="mb-0 ps-4 me-4">Total</h5>
+                        <p class="mb-0 total-price">@((Model.Sum(x => x.Price * x.Quantity) + 3).ToString("C", new System.Globalization.CultureInfo("tr-TR")))</p>
+                    </div>
+                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Cart Page End -->
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(function () {
+        function formatCurrency(value) {
+            return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+        }
+
+        $('.btn-plus').off('click').on('click', function () {
+            var container = $(this).closest('.input-group.quantity');
+            var input = container.find('.quantity-input');
+            var quantity = parseInt(input.val());
+            quantity++;
+            input.val(quantity);
+
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+        });
+
+        $('.btn-minus').off('click').on('click', function () {
+            var container = $(this).closest('.input-group.quantity');
+            var input = container.find('.quantity-input');
+            var quantity = parseInt(input.val());
+            if (quantity > 1) {
+                quantity--;
+                input.val(quantity);
+
+                updateRowTotal(container, quantity);
+                updateCartTotal();
+            }
+        });
+
+        $('.btn-remove-item').off('click').on('click', function () {
+            if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
+                var row = $(this).closest('tr');
+                row.remove();
+                updateCartTotal();
+            }
+        });
+
+        function updateRowTotal(container, quantity) {
+            var productRow = container.closest('tr');
+            var priceText = productRow.find('.price-text').text();
+            var price = parseCurrency(priceText);
+
+            var totalPrice = price * quantity;
+            productRow.find('.item-total-price').text(formatCurrency(totalPrice));
+        }
+
+        function updateCartTotal() {
+            var subtotal = 0;
+            $('tbody tr').each(function () {
+                var totalText = $(this).find('.item-total-price').text();
+                subtotal += parseCurrency(totalText);
+            });
+
+            $('.subtotal-price').text(formatCurrency(subtotal));
+
+            var shipping = 3;
+            $('.total-price').text(formatCurrency(subtotal + shipping));
+        }
+
+        function parseCurrency(value) {
+            value = value.replace('₺', '').trim();
+            value = value.replace(/\./g, '');
+            value = value.replace(',', '.');
+            return parseFloat(value);
+        }
+    });
+</script>

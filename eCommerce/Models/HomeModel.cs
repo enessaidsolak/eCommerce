@@ -1,4 +1,5 @@
-﻿using eCommerce.DATA.Entity;
+﻿using eCommerce.Controllers;
+using eCommerce.DATA.Entity;
 using eCommerce.Dtos;
 
 namespace eCommerce.Models
@@ -13,6 +14,12 @@ namespace eCommerce.Models
         public List<Product> Category5Products { get; set; }
 
         public List<Product> LatestProducts { get; set; }
+
+        public List<Product> BestSellingProduct { get; set; }
+
+        public List<ProductComment> ProductComments { get; set; }  
+        
+
 
 
     }

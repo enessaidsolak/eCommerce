@@ -26,6 +26,8 @@ public partial class eCommerceDBContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductComment> ProductComments { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -116,6 +118,25 @@ public partial class eCommerceDBContext : DbContext
             entity.HasOne(d => d.Category).WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
                 .HasConstraintName("FK__Products__Catego__656C112C");
+        });
+
+        modelBuilder.Entity<ProductComment>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK_ProductCommerce");
+
+            entity.ToTable("ProductComment");
+
+            entity.Property(e => e.CreatedDate).HasColumnType("datetime");
+
+            entity.HasOne(d => d.Product).WithMany(p => p.ProductComments)
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductCommerce_Products");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ProductComments)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProductCommerce_Users");
         });
 
         modelBuilder.Entity<User>(entity =>

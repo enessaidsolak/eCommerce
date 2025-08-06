@@ -20,4 +20,6 @@ public partial class User
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+
+    public virtual ICollection<ProductComment> ProductComments { get; set; } = new List<ProductComment>();
 }

@@ -27,8 +27,7 @@ public class ShopController : Controller
     public IActionResult Index(int? categoryID, decimal? price,string? keyword)
     {
         var model = new ProductModel();
-        model.Categories = db.Categories.ToList();
-
+        model.Categories = db.Categories.Include(x => x.Products).ToList();
         var query = db.Products.Include(p => p.Category).AsQueryable();
 
         if (categoryID.HasValue)
@@ -47,7 +46,7 @@ public class ShopController : Controller
         {
             query = query.Where(p =>
                 p.ProductName.Contains(keyword) ||
-                p.Description.Contains(keyword)); // eğer açıklama varsa
+                p.Description.Contains(keyword));
             model.SelectedKeyword = keyword;
         }
 

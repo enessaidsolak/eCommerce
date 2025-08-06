@@ -11,6 +11,7 @@ namespace eCommerce.DATA.Models
         public decimal? SelectedPrice { get; set; }
 
         public string? SelectedKeyword { get; set; }
+        public string? Image { get; set; }
 
     }
 }

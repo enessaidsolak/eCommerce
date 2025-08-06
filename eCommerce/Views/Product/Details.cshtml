@@ -178,41 +178,106 @@
                             </div>
                         </div>
                     </div>
-                    <form action="#">
-                        <h4 class="mb-5 fw-bold">Cevap Bırakınız</h4>
-                        <div class="row g-4">
-                            <div class="col-lg-6">
-                                <div class="border-bottom rounded">
-                                    <input type="text" class="form-control border-0 me-4" placeholder="Adınız *">
-                                </div>
-                            </div>
-                            <div class="col-lg-6">
-                                <div class="border-bottom rounded">
-                                    <input type="email" class="form-control border-0" placeholder="Soyadınız *">
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="border-bottom rounded my-4">
-                                    <textarea name="" id="" class="form-control border-0" cols="30" rows="8" placeholder="Yorumunuz *" spellcheck="false"></textarea>
-                                </div>
-                            </div>
-                            <div class="col-lg-12">
-                                <div class="d-flex justify-content-between py-3 mb-5">
-                                    <div class="d-flex align-items-center">
-                                        <p class="mb-0 me-3">Lütfen Derecelendirin:</p>
-                                        <div class="d-flex align-items-center" style="font-size: 12px;">
-                                            <i class="fa fa-star text-muted"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                            <i class="fa fa-star"></i>
-                                        </div>
-                                    </div>
-                                    <a href="#" class="btn border border-secondary text-primary rounded-pill px-4 py-3"> Yorum Gönder </a>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                    <h4 class="mb-4 fw-bold">Yorumlar</h4>
+
+                 @if (Model.ProductComments != null && Model.ProductComments.Any())
+{
+    foreach (var yorum in Model.ProductComments)
+    {
+        <div class="border-bottom pb-3 mb-3">
+            <h6 class="fw-bold">@yorum.User.FirstName @yorum.User.LastName</h6>
+            <small class="text-muted">@yorum.CreatedDate?.ToString("dd MMM yyyy HH:mm")</small>
+
+            <p class="mt-2">@yorum.Comment</p>
+
+            <div>
+                @for (int i = 1; i <= 5; i++)
+                {
+                    if(i <= yorum.Rating)
+                    {
+                        <i class="fa fa-star text-warning"></i>
+                    }
+                    else
+                    {
+                        <i class="fa fa-star text-muted"></i>
+                    }
+                }
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p>Henüz yorum yapılmamış.</p>
+}
+
+
+<form asp-controller="Product" asp-action="AddComment" method="post">
+    <h4 class="mb-5 fw-bold">Cevap Bırakınız</h4>
+
+    <input type="hidden" name="productId" value="@Model.Product.ProductId" />
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="border-bottom rounded">
+                <input type="text" name="firstName" class="form-control border-0 me-4" placeholder="Adınız *" required>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="border-bottom rounded">
+                <input type="email" name="email" class="form-control border-0" placeholder="Email *" required>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="border-bottom rounded my-4">
+                <textarea name="comment" class="form-control border-0" cols="30" rows="8" placeholder="Yorumunuz *" spellcheck="false" required></textarea>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div class="d-flex justify-content-between py-3 mb-5">
+                <div class="d-flex align-items-center">
+                    <p class="mb-0 me-3">Lütfen Derecelendirin:</p>
+                    <div class="d-flex align-items-center" style="font-size: 20px;">
+                                            @for (int i = 1; i <= 5; i++)
+                                            {
+                                <i class="fa fa-star text-muted star" data-value="@i" style="cursor:pointer; margin-right: 5px;"></i>
+                                            }
+                    </div>
+                </div>
+                <input type="hidden" name="rating" id="ratingInput" value="0" />
+
+                <button type="submit" class="btn border border-secondary text-primary rounded-pill px-4 py-3">
+                    Yorum Gönder
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const stars = document.querySelectorAll(".star");
+        const ratingInput = document.getElementById("ratingInput");
+
+        stars.forEach(star => {
+            star.addEventListener("click", function () {
+                const rating = this.getAttribute("data-value");
+                ratingInput.value = rating;
+
+                stars.forEach(s => s.classList.remove("text-warning"));
+                stars.forEach(s => s.classList.add("text-muted"));
+
+                for (let i = 0; i < rating; i++) {
+                    stars[i].classList.remove("text-muted");
+                    stars[i].classList.add("text-warning");
+                }
+            });
+        });
+    });
+</script>
+
+
+
                 </div>
             </div>
              <div class="col-lg-4 col-xl-3">
@@ -229,7 +294,9 @@
                                 {
                                     <div class="d-flex justify-content-between fruite-name">
                                         <a href="@Url.Action("Index","Shop",new{categoryID=item.CategoryId})"><i class="fas a-apple-alt me-2"></i>@item.CategoryName</a>
-                                        <span>(3)</span>
+                                        <span>@(item.Products == null ? "0" : item.Products.Count())</span>
+
+
                                     </div>
                                 }
                                 <li>
@@ -265,7 +332,10 @@
                     </h4>
                     <p>@item.Description</p>
                     <div class="d-flex justify-content-between flex-lg-wrap">
-                        <p class="text-dark fs-5 fw-bold">$7.99 / kg</p>
+                            <p class="text-dark fs-5 fw-bold">
+                                    @(item.Price.HasValue ? item.Price.Value.ToString("F2") + " ₺" : "0.00 ₺") / kg
+    </p>
+
                         <a href="#" class="btn border border-secondary rounded-pill px-3 py-1 mb-4 text-primary">
                             <i class="fa fa-shopping-bag me-2 text-primary"></i> Sepete Ekle
                         </a>
