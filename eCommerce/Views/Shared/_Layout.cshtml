@@ -103,13 +103,29 @@
                     </div>
                         <div class="d-flex m-3 me-0">
                             <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search text-primary"></i></button>
-                            <a href="#" class="position-relative me-4 my-auto">
+                        <!-- Sepet ikonu ve açılır önizleme -->
+                        <div class="position-relative me-4 my-auto dropdown">
+                            <a href="#" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Sepetiniz" class="text-dark">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <span class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1" style="top: -5px; left: 15px; height: 20px; min-width: 20px;">3</span>
+                                <span id="cartItemCount" class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+                                      style="top: -5px; left: 15px; height: 20px; min-width: 20px;">0</span>
                             </a>
-                            <a href="#" class="my-auto">
-                                <i class="fas fa-user fa-2x"></i>
-                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 300px; max-height: 400px; overflow-y: auto;">
+                                <li>
+                                    <div id="cartPreview">
+                                        <!-- Sepet ürünleri buraya JS ile eklenecek -->
+                                        <p>Sepetiniz boş</p>
+                                    </div>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a href="/Cart/Index" class="dropdown-item text-center">Sepete Git</a></li>
+                            </ul>
+                        </div>
+
+                        <a href="#" class="my-auto">
+                            <i class="fas fa-user fa-2x"></i>
+                        </a>
+
                         </div>
                     </div>
                 </nav>
@@ -233,6 +249,86 @@
         detail.onclick = function () {
             detail.classList.add("active");
         }
+    </script>
+
+    <script>
+        function getCartFromCookie() {
+            var name = "cart=";
+            var decodedCookie = decodeURIComponent(document.cookie);
+            var ca = decodedCookie.split(';');
+            for (var i = 0; i < ca.length; i++) {
+                var c = ca[i].trim();
+                if (c.indexOf(name) == 0) {
+                    try {
+                        return JSON.parse(c.substring(name.length, c.length));
+                    } catch {
+                        return [];
+                    }
+                }
+            }
+            return [];
+        }
+
+        function updateCartIcon() {
+            var cartItems = getCartFromCookie();
+            var totalCount = 0;
+            cartItems.forEach(function (item) {
+                totalCount += item.Quantity;
+            });
+            var countSpan = document.getElementById('cartItemCount');
+            if (countSpan) {
+                countSpan.textContent = totalCount;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            updateCartIcon();
+        });
+    </script>
+
+    <script>
+        function getCookie(name) {
+            let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+            return v ? decodeURIComponent(v[2]) : null;
+        }
+
+        function loadCartPreview() {
+            let cart = JSON.parse(getCookie('cart') || '[]');
+            let container = $('#cartPreview');
+            container.empty();
+
+            if (cart.length === 0) {
+                container.append('<p>Sepetiniz boş</p>');
+                return;
+            }
+
+            cart.forEach(item => {
+                container.append(`
+                        <div class="d-flex align-items-center mb-2">
+                            <img src="${item.ImageUrl}" alt="${item.Name}" style="width:40px; height:40px; object-fit:cover; margin-right:10px; border-radius:4px;" />
+                            <div>
+                                <p class="mb-0">${item.Name}</p>
+                                <small>Adet: ${item.Quantity}</small>
+                            </div>
+                        </div>
+                    `);
+            });
+        }
+
+        function updateCartIcon() {
+            let cart = JSON.parse(getCookie('cart') || '[]');
+            let totalCount = 0;
+            cart.forEach(item => totalCount += item.Quantity);
+            let countSpan = document.getElementById('cartItemCount');
+            if (countSpan) {
+                countSpan.textContent = totalCount;
+            }
+        }
+
+        $(document).ready(function () {
+            loadCartPreview();
+            updateCartIcon();
+        });
     </script>
 
 

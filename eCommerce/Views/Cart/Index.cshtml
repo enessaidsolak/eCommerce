@@ -10,6 +10,7 @@
     </ol>
 </div>
 <!-- Single Page Header End -->
+
 <!-- Cart Page Start -->
 <div class="container-fluid py-5">
     <div class="container py-5">
@@ -33,27 +34,23 @@
                                 <div class="d-flex align-items-center">
                                     <a href="@Url.Action("Index", "Home", new { idOrName = item.ProductId })">
                                         <div class="fruite-img">
-                                            <img src="@item.ImageUrl" class="img-fluid w-75 rounded-top" alt="@item.ProductName">
+                                            <img src="@item.ImageUrl" class="img-fluid w-75 rounded-top" alt="@item.Name">
                                         </div>
                                     </a>
                                 </div>
                             </th>
-                            <td>
-                                <p class="mb-0 mt-4">@item.Name</p>
-                            </td>
-                            <td>
-                                <p class="mb-0 mt-4 price-text">@item.Price.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
-                            </td>
+                            <td><p class="mb-0 mt-4">@item.Name</p></td>
+                            <td><p class="mb-0 mt-4 price-text">@item.Price.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p></td>
                             <td>
                                 <div class="input-group quantity mt-4" style="width: 100px;" data-product-id="@item.ProductId">
                                     <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border">
+                                        <button class="btn btn-sm btn-minus rounded-circle bg-light border" data-id="@item.ProductId">
                                             <i class="fa fa-minus"></i>
                                         </button>
                                     </div>
-                                    <input type="text" class="form-control form-control-sm text-center border-0 quantity-input" value="@item.Quantity" readonly>
+                                    <input type="text" class="form-control form-control-sm text-center border-0 quantity-input" value="@item.Quantity" data-id="@item.ProductId" />
                                     <div class="input-group-btn">
-                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border">
+                                        <button class="btn btn-sm btn-plus rounded-circle bg-light border" data-id="@item.ProductId">
                                             <i class="fa fa-plus"></i>
                                         </button>
                                     </div>
@@ -65,7 +62,7 @@
                                 </p>
                             </td>
                             <td>
-                                <button class="btn btn-md rounded-circle bg-light border mt-4 btn-remove-item" title="Remove item">
+                                <button class="btn btn-md rounded-circle bg-light border mt-4 btn-remove-item" data-id="@item.ProductId" title="Remove item">
                                     <i class="fa fa-times text-danger"></i>
                                 </button>
                             </td>
@@ -76,7 +73,7 @@
         </div>
 
         <div class="mt-5">
-            <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code">
+            <input type="text" class="border-0 border-bottom rounded me-5 py-3 mb-4" placeholder="Coupon Code" />
             <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="button">Apply Coupon</button>
         </div>
 
@@ -110,50 +107,24 @@
 </div>
 <!-- Cart Page End -->
 
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <script>
     $(function () {
         function formatCurrency(value) {
             return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
         }
 
-        $('.btn-plus').off('click').on('click', function () {
-            var container = $(this).closest('.input-group.quantity');
-            var input = container.find('.quantity-input');
-            var quantity = parseInt(input.val());
-            quantity++;
-            input.val(quantity);
-
-            updateRowTotal(container, quantity);
-            updateCartTotal();
-        });
-
-        $('.btn-minus').off('click').on('click', function () {
-            var container = $(this).closest('.input-group.quantity');
-            var input = container.find('.quantity-input');
-            var quantity = parseInt(input.val());
-            if (quantity > 1) {
-                quantity--;
-                input.val(quantity);
-
-                updateRowTotal(container, quantity);
-                updateCartTotal();
-            }
-        });
-
-        $('.btn-remove-item').off('click').on('click', function () {
-            if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
-                var row = $(this).closest('tr');
-                row.remove();
-                updateCartTotal();
-            }
-        });
+        function parseCurrency(value) {
+            value = value.replace('₺', '').trim().replace(/\./g, '').replace(',', '.');
+            return parseFloat(value);
+        }
 
         function updateRowTotal(container, quantity) {
             var productRow = container.closest('tr');
             var priceText = productRow.find('.price-text').text();
             var price = parseCurrency(priceText);
-
             var totalPrice = price * quantity;
             productRow.find('.item-total-price').text(formatCurrency(totalPrice));
         }
@@ -166,16 +137,139 @@
             });
 
             $('.subtotal-price').text(formatCurrency(subtotal));
-
-            var shipping = 3;
-            $('.total-price').text(formatCurrency(subtotal + shipping));
+            $('.total-price').text(formatCurrency(subtotal + 3)); // Kargo sabit ₺3
         }
 
-        function parseCurrency(value) {
-            value = value.replace('₺', '').trim();
-            value = value.replace(/\./g, '');
-            value = value.replace(',', '.');
-            return parseFloat(value);
+        function sendUpdateQuantity(productId, quantity, container) {
+            $.ajax({
+                url: '/Cart/UpdateQuantity',
+                type: 'POST',
+                data: {
+                    id: productId,
+                    quantity: quantity
+                },
+                success: function (response) {
+                    if (response.success) {
+                        if (quantity === 0) {
+                            container.closest('tr').remove();
+                            updateCartTotal();
+                        }
+                        else {
+                            updateRowTotal(container, quantity);
+                            updateCartTotal();
+                        }
+                    } else {
+                        alert("Ürün bulunamadı.");
+                    }
+                },
+                error: function () {
+                    alert("Bir hata oluştu.");
+                }
+            });
         }
+
+        // Yeni: Miktara göre butonları aktif/pasif yapar
+        function updateButtonsState() {
+            $('tbody tr').each(function () {
+                var quantityInput = $(this).find('.quantity-input');
+                var quantity = parseInt(quantityInput.val()) || 1;
+
+                var btnMinus = $(this).find('.btn-minus');
+                // Artı butonu hep açık kalsın, istersen onun için de işlem yapabilirsin.
+
+                if (quantity <= 1) {
+                    btnMinus.css('display', 'none');  // gizle
+                } else {
+                    btnMinus.css('display', 'inline-block');  // göster (veya 'inline' da olabilir)
+                }
+            });
+        }
+
+        $('.btn-plus').off('click').on('click', function () {
+            var container = $(this).closest('.input-group.quantity');
+            var input = container.find('.quantity-input');
+            var quantity = parseInt(input.val()) || 0;
+            quantity += 1;
+            input.val(quantity);
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+
+            var productId = $(this).data('id');
+            sendUpdateQuantity(productId, quantity, container);
+
+            updateButtonsState(); // buraya ekledik
+        });
+
+        $('.btn-minus').off('click').on('click', function () {
+            var container = $(this).closest('.input-group.quantity');
+            var input = container.find('.quantity-input');
+            var quantity = parseInt(input.val()) || 0;
+            quantity = Math.max(0, quantity - 1);
+            input.val(quantity);
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+
+            var productId = $(this).data('id');
+            sendUpdateQuantity(productId, quantity, container);
+
+            updateButtonsState(); // buraya ekledik
+        });
+
+        // 🆕 Elle input kutusuna yazma durumunda güncelleme
+        $('.quantity-input').off('change').on('change', function () {
+            var input = $(this);
+            var container = input.closest('.input-group.quantity');
+            var quantity = parseInt(input.val());
+
+            if (isNaN(quantity) || quantity < 1) quantity = 1; // Minimum 1
+            input.val(quantity);
+
+            var productId = input.data('id');
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+            sendUpdateQuantity(productId, quantity, container);
+
+            updateButtonsState(); // buraya ekledik
+        });
+
+        // 🆕 Sadece rakam girilmesini sağla
+        $('.quantity-input').on('keydown', function (e) {
+            var allowedKeys = [8, 9, 13, 37, 38, 39, 40, 46]; // Backspace, Tab, Enter, Ok tuşları, Delete
+            if (
+                allowedKeys.indexOf(e.keyCode) !== -1 ||
+                (e.keyCode >= 48 && e.keyCode <= 57) || // üst satır rakamlar
+                (e.keyCode >= 96 && e.keyCode <= 105)   // numpad rakamlar
+            ) {
+                return; // izin ver
+            } else {
+                e.preventDefault(); // diğer tuşları engelle
+            }
+        });
+
+        $('.btn-remove-item').off('click').on('click', function () {
+            if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
+                var productId = $(this).data('id');
+                var container = $(this).closest('tr');
+                $.ajax({
+                    url: '/Cart/RemoveFromCart',
+                    type: 'POST',
+                    data: { id: productId },
+                    success: function () {
+                        container.remove();
+                        updateCartTotal();
+                        updateButtonsState(); // silmeden sonra butonları güncelle
+                    },
+                    error: function () {
+                        alert("Silme işleminde hata oluştu.");
+                    }
+                });
+            }
+        });
+
+        // Sayfa yüklendiğinde toplamları ve buton durumlarını güncelle
+        updateCartTotal();
+        updateButtonsState();
     });
 </script>
+x
+

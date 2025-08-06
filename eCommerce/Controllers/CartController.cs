@@ -1,63 +1,36 @@
 ﻿using eCommerce.DATA.Context;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace eCommerce.Controllers
 {
-    
     public class CartController : Controller
     {
-        private readonly eCommerceDBContext dbContext;
-        private eCommerceDBContext _context;
+        private readonly eCommerceDBContext _context;
 
         public CartController(eCommerceDBContext context)
         {
             _context = context;
         }
 
-        public ActionResult Index() 
+        public IActionResult Index()
         {
-
-            var cartJson = Request.Cookies["cart"];
-            List<CartItemModel> cartItems;
-
-            if (string.IsNullOrEmpty(cartJson))
-            {
-                cartItems = new List<CartItemModel>(); // Sepet boşsa boş liste
-            }
-            else
-            {
-                cartItems = JsonSerializer.Deserialize<List<CartItemModel>>(cartJson) ?? new List<CartItemModel>();
-            }
-
-            // View'e gönder
+            var cartItems = GetCartItemsFromCookie();
             return View(cartItems);
         }
 
-        /// <summary>
-        /// Kart Ekleme
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
+        [HttpGet]
         public IActionResult AddToCart(int id)
         {
-            // Ürünü veritabanından çek
             var product = _context.Products.FirstOrDefault(x => x.ProductId == id);
-            if (product == null)
-                return NotFound();
+            if (product == null) return NotFound();
 
-            // Cookie'den mevcut sepeti oku
-            var cartJson = Request.Cookies["cart"];
-            List<CartItemModel> cartItems = string.IsNullOrEmpty(cartJson)
-                ? new List<CartItemModel>()
-                : JsonSerializer.Deserialize<List<CartItemModel>>(cartJson);
-
-            // Aynı ürün varsa adedini artır
+            var cartItems = GetCartItemsFromCookie();
             var existingItem = cartItems.FirstOrDefault(x => x.ProductId == id);
+
             if (existingItem != null)
             {
-                existingItem.Quantity++;
+                existingItem.Quantity = 1; // **Burada 1 yapıyoruz, eski quantity kalmasın**
             }
             else
             {
@@ -66,23 +39,64 @@ namespace eCommerce.Controllers
                     ProductId = product.ProductId,
                     Name = product.ProductName,
                     Price = product.Price ?? 0,
-                    Cookie = product.ProductName,
                     Quantity = 1,
                     ImageUrl = product.ImageUrl
                 });
-              
             }
 
-            // Cookie'ye geri yaz
-            Response.Cookies.Append("cart", JsonSerializer.Serialize(cartItems), new CookieOptions
-            {
-                Expires = DateTimeOffset.Now.AddDays(7)
-            });
-
+            SaveCartToCookie(cartItems);
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public IActionResult RemoveFromCart(int id)
+        {
+            var cartItems = GetCartItemsFromCookie();
+            var item = cartItems.FirstOrDefault(x => x.ProductId == id);
+            if (item != null)
+            {
+                cartItems.Remove(item);
+                SaveCartToCookie(cartItems);
+            }
+            return RedirectToAction("Index");
+        }
 
+        [HttpPost]
+        public IActionResult UpdateQuantity(int id, int quantity)
+        {
+            var cartItems = GetCartItemsFromCookie();
+            var item = cartItems.FirstOrDefault(x => x.ProductId == id);
+
+            if (item != null)
+            {
+                if (quantity > 0)
+                {
+                    item.Quantity = quantity;
+                }
+                else
+                {
+                    cartItems.Remove(item);
+                }
+
+                SaveCartToCookie(cartItems);
+                return Json(new { success = true, quantity = item.Quantity });
+            }
+
+            return Json(new { success = false });
+        }
+
+        private List<CartItemModel> GetCartItemsFromCookie()
+        {
+            var cartJson = Request.Cookies["cart"];
+            return string.IsNullOrEmpty(cartJson)
+                ? new List<CartItemModel>()
+                : JsonSerializer.Deserialize<List<CartItemModel>>(cartJson) ?? new List<CartItemModel>();
+        }
+
+        private void SaveCartToCookie(List<CartItemModel> cartItems)
+        {
+            var options = new CookieOptions { Expires = DateTimeOffset.Now.AddDays(7) };
+            Response.Cookies.Append("cart", JsonSerializer.Serialize(cartItems), options);
+        }
     }
-
 }
