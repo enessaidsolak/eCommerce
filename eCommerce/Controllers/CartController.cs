@@ -35,7 +35,11 @@ namespace eCommerce.Controllers
             return View(cartItems);
         }
 
-
+        /// <summary>
+        /// Kart Ekleme
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public IActionResult AddToCart(int id)
         {
             // Ürünü veritabanından çek
