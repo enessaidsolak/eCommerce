@@ -20,6 +20,10 @@ public partial class eCommerceDBContext : DbContext
 
     public virtual DbSet<Category> Categories { get; set; }
 
+    public virtual DbSet<Coupon> Coupons { get; set; }
+
+    public virtual DbSet<CouponUsage> CouponUsages { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
@@ -60,6 +64,23 @@ public partial class eCommerceDBContext : DbContext
             entity.Property(e => e.CategoryName).HasMaxLength(100);
             entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.ImageUrl).HasMaxLength(50);
+        });
+
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasNoKey();
+
+            entity.Property(e => e.Code).HasMaxLength(50);
+            entity.Property(e => e.DiscountRate).HasColumnType("decimal(5, 2)");
+            entity.Property(e => e.ExpiryDate).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<CouponUsage>(entity =>
+        {
+            entity.ToTable("CouponUsage");
+
+            entity.Property(e => e.UsedAt).HasColumnType("datetime");
+            entity.Property(e => e.UserId).HasMaxLength(450);
         });
 
         modelBuilder.Entity<Order>(entity =>
