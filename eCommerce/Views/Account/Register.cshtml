@@ -1,0 +1,66 @@
+﻿@model RegisterViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Kayıt Ol";
+}
+
+<h2>Kayıt Ol</h2>
+
+<form asp-controller="Account" asp-action="Register" method="post">
+    <div class="container" style="padding-top:120px;">
+        <div class="mb-3">
+            <label for="firstName" class="form-label">Name</label>
+            <input asp-for="FirstName" class="form-control" />
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label for="lastName" class="form-label">Surname</label>
+            <input asp-for="LastName" class="form-control" />
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 position-relative">
+            <label for="password" class="form-label">Şifre</label>
+            <input asp-for="Password" type="password" class="form-control" id="passwordInput" />
+            <span class="position-absolute" style="top: 38px; right: 15px; cursor: pointer; user-select: none;" onclick="togglePassword('passwordInput', 'toggleIcon1')">
+                <i id="toggleIcon1" class="fas fa-eye"></i>
+            </span>
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3 position-relative">
+            <label for="confirmPassword" class="form-label">Şifre Tekrar</label>
+            <input asp-for="ConfirmPassword" type="password" class="form-control" id="confirmPasswordInput" />
+            <span class="position-absolute" style="top: 38px; right: 15px; cursor: pointer; user-select: none;" onclick="togglePassword('confirmPasswordInput', 'toggleIcon2')">
+                <i id="toggleIcon2" class="fas fa-eye"></i>
+            </span>
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Kayıt Ol</button>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+    </script>
+}

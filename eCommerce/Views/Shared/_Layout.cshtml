@@ -1,73 +1,78 @@
 ﻿@{
     var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
-    var lkglşak = 5;
+    ViewData["Title"] = ViewData["Title"] ?? "Fruitables";
 }
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 
-    <head>
-        <meta charset="utf-8">
-        <title>Fruitables - Vegetable Website Template</title>
-        <meta content="width=device-width, initial-scale=1.0" name="viewport">
-        <meta content="" name="keywords">
-        <meta content="" name="description">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Fruitables</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="keywords" content="" />
+    <meta name="description" content="" />
 
-        <!-- Google Web Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap" rel="stylesheet"> 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&family=Raleway:wght@600;800&display=swap"
+          rel="stylesheet" />
 
-        <!-- Icon Font Stylesheet -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Icon Fonts -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
 
-        <!-- Libraries Stylesheet -->
-        <link href="~/lib/lightbox/css/lightbox.min.css" rel="stylesheet">
-    <link href="~/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <!-- Library CSS -->
+    <link href="~/lib/lightbox/css/lightbox.min.css" rel="stylesheet" />
+    <link href="~/lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet" />
 
+    <!-- Bootstrap CSS -->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
 
-        <!-- Customized Bootstrap Stylesheet -->
-    <link href="~/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <link href="~/css/style.css" rel="stylesheet" />
+</head>
 
-        <!-- Template Stylesheet -->
-    <link href="~/css/style.css" rel="stylesheet">
-    </head>
+<body>
+    <!-- Spinner -->
+    <div id="spinner"
+         class="show w-100 vh-100 bg-white position-fixed translate-middle top-50 start-50 d-flex align-items-center justify-content-center">
+        <div class="spinner-grow text-primary" role="status"></div>
+    </div>
 
-    <body>
-
-        <!-- Spinner Start -->
-        <div id="spinner" class="show w-100 vh-100 bg-white position-fixed translate-middle top-50 start-50  d-flex align-items-center justify-content-center">
-            <div class="spinner-grow text-primary" role="status"></div>
-        </div>
-        <!-- Spinner End -->
-
-
-        <!-- Navbar start -->
-        <div class="container-fluid fixed-top">
-            <div class="container topbar bg-primary d-none d-lg-block">
-                <div class="d-flex justify-content-between">
-                    <div class="top-info ps-2">
-                        <small class="me-3"><i class="fas fa-map-marker-alt me-2 text-secondary"></i> <a href="#" class="text-white">1. Sokak, İstanbul</a></small>
-                        <small class="me-3"><i class="fas fa-envelope me-2 text-secondary"></i><a href="#" class="text-white">enes@gmail.com</a></small>
-                    </div>
-                    <div class="top-link pe-2">
-                        <a href="#" class="text-white"><small class="text-white mx-2">Gizlilik Politikası</small>/</a>
-                        <a href="#" class="text-white"><small class="text-white mx-2">Kullanım Koşulları</small>/</a>
-                        <a href="#" class="text-white"><small class="text-white ms-2">Satış Ve İadeler</small></a>
-                    </div>
+    <!-- Navbar -->
+    <div class="container-fluid fixed-top">
+        <div class="container topbar bg-primary d-none d-lg-block">
+            <div class="d-flex justify-content-between">
+                <div class="top-info ps-2">
+                    <small class="me-3">
+                        <i class="fas fa-map-marker-alt me-2 text-secondary"></i> <a href="#"
+                                                                                     class="text-white">1. Sokak, İstanbul</a>
+                    </small>
+                    <small class="me-3">
+                        <i class="fas fa-envelope me-2 text-secondary"></i><a href="#"
+                                                                              class="text-white">enes@gmail.com</a>
+                    </small>
+                </div>
+                <div class="top-link pe-2">
+                    <a href="#" class="text-white"><small class="text-white mx-2">Gizlilik Politikası</small>/</a>
+                    <a href="#" class="text-white"><small class="text-white mx-2">Kullanım Koşulları</small>/</a>
+                    <a href="#" class="text-white"><small class="text-white ms-2">Satış Ve İadeler</small></a>
                 </div>
             </div>
-            <div class="container px-0">
-                <nav class="navbar navbar-light bg-white navbar-expand-xl">
+        </div>
+        <div class="container px-0">
+            <nav class="navbar navbar-light bg-white navbar-expand-xl">
                 <a href="@Url.Action("Index", "Home")" class="navbar-brand">
                     <h1 class="text-primary display-6">Meyveler</h1>
                 </a>
 
-                    <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
-                        <span class="fa fa-bars text-primary"></span>
-                    </button>
-                    <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
+                <button class="navbar-toggler py-2 px-3" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="fa fa-bars text-primary"></span>
+                </button>
+                <div class="collapse navbar-collapse bg-white" id="navbarCollapse">
                     <div class="navbar-nav mx-auto">
                         <a asp-controller="Home" asp-action="Index"
                            class="nav-item nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")">
@@ -79,159 +84,201 @@
                             Alışveriş
                         </a>
 
-                     @*    <a asp-controller="Shop" asp-action="Detail"
-                           class="nav-item nav-link @(currentController == "Product" && currentAction == "Details" ? "active" : "")">
-                            Shop Detail
-                        </a> *@
-
-                     @*    <div class="nav-item dropdown">
-                            <a href="#" class="nav-link dropdown-toggle @(currentAction == "Cart" || currentAction == "Checkout" || currentAction == "Testimonial" || currentAction == "Error404" ? "active" : "")" data-bs-toggle="dropdown">
-                                Pages
-                            </a>
-                            <div class="dropdown-menu m-0 bg-secondary rounded-0">
-                                <a asp-controller="Cart" asp-action="Index" class="dropdown-item">Cart</a>
-                                <a asp-controller="Checkout" asp-action="Index" class="dropdown-item">Checkout</a>
-                                <a asp-controller="Home" asp-action="Testimonial" class="dropdown-item">Testimonial</a>
-                                <a asp-controller="Home" asp-action="Error404" class="dropdown-item">404 Page</a>
-                            </div>
-                        </div> *@
-
                         <a asp-controller="Contact" asp-action="Index"
                            class="nav-item nav-link @(currentController == "Contact" ? "active" : "")">
                             İletişim
                         </a>
                     </div>
-                        <div class="d-flex m-3 me-0">
-                            <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4" data-bs-toggle="modal" data-bs-target="#searchModal"><i class="fas fa-search text-primary"></i></button>
-                        <!-- Sepet ikonu ve açılır önizleme -->
+
+                    <div class="d-flex m-3 me-0 align-items-center">
+                        <!-- Arama Butonu -->
+                        <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
+                                data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Search">
+                            <i class="fas fa-search text-primary"></i>
+                        </button>
+
+                        <!-- Sepet -->
                         <div class="position-relative me-4 my-auto dropdown">
-                            <a href="#" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Sepetiniz" >
+                            <a href="#" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Sepetiniz">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
-                                <span id="cartItemCount" class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
+                                <span id="cartItemCount"
+                                      class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
                                       style="top: -5px; left: 15px; height: 20px; min-width: 20px;">0</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown" style="min-width: 300px; max-height: 400px; overflow-y: auto;">
+                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown"
+                                style="min-width: 300px; max-height: 400px; overflow-y: auto;">
                                 <li>
                                     <div id="cartPreview">
-                                        <!-- Sepet ürünleri buraya JS ile eklenecek -->
                                         <p>Sepetiniz boş</p>
                                     </div>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
                                 <li><a href="/Cart/Index" class="dropdown-item text-center">Sepete Git</a></li>
                             </ul>
                         </div>
 
-                        <a href="#" class="my-auto">
-                            <i class="fas fa-user fa-2x"></i>
-                        </a>
+                        <!-- Kullanıcı Menü -->
+                        <div class="dropdown">
+                            <a href="#" class="my-auto dropdown-toggle" id="userDropdown" role="button"
+                               data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">
+                                <i class="fas fa-user fa-2x"></i>
+                                @($"{User.FindFirst("Name")?.Value} {User.FindFirst("SurName")?.Value}")
+                            </a>
 
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Logout">Çıkış Yap</a></li>
+                                }
+                                else
+                                {
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Login">Giriş Yap</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="ForgotPassword">Şifremi Unuttum</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Account" asp-action="Register">Kayıt Ol</a></li>
+                                }
+                            </ul>
                         </div>
                     </div>
-                </nav>
+                </div>
+            </nav>
+        </div>
+    </div>
+    <!-- Navbar End -->
+    <!-- Arama Modal (arama butonunu açar) -->
+    <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="searchModalLabel">Ara</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-controller="Shop" asp-action="Index" method="get">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control" placeholder="Ürün ara..." autofocus />
+                            <button type="submit" class="btn btn-primary">Ara</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-        <!-- Navbar End -->
+    </div>
 
+    @RenderBody()
 
-        @RenderBody()
-
-        <!-- Footer Start -->
-        <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
-            <div class="container py-5">
-                <div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5) ;">
-                    <div class="row g-4">
-                        <div class="col-lg-3">
-                            <a href="#">
-                                <h1 class="text-primary mb-0">Meyveler</h1>
-                                <p class="text-secondary mb-0">Taze Ürünler</p>
+    <!-- Footer -->
+    <div class="container-fluid bg-dark text-white-50 footer pt-5 mt-5">
+        <div class="container py-5">
+            <div class="pb-4 mb-4" style="border-bottom: 1px solid rgba(226, 175, 24, 0.5);">
+                <div class="row g-4">
+                    <div class="col-lg-3">
+                        <a href="#">
+                            <h1 class="text-primary mb-0">Meyveler</h1>
+                            <p class="text-secondary mb-0">Taze Ürünler</p>
+                        </a>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="position-relative mx-auto">
+                            <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="email"
+                                   placeholder="E-posta adresiniz" />
+                            <button type="submit"
+                                    class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white"
+                                    style="top: 0; right: 0;">
+                                Şimdi Abone Ol
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-lg-3">
+                        <div class="d-flex justify-content-end pt-3">
+                            <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href="">
+                                <i class="fab fa-twitter"></i>
+                            </a>
+                            <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href="">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href="">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                            <a class="btn btn-outline-secondary btn-md-square rounded-circle" href="">
+                                <i class="fab fa-linkedin-in"></i>
                             </a>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="position-relative mx-auto">
-                                <input class="form-control border-0 w-100 py-3 px-4 rounded-pill" type="number" placeholder="E postanız">
-                                <button type="submit" class="btn btn-primary border-0 border-secondary py-3 px-4 position-absolute rounded-pill text-white" style="top: 0; right: 0;">Şimdi Abone Ol</button>
-                            </div>
-                        </div>
-                        <div class="col-lg-3">
-                            <div class="d-flex justify-content-end pt-3">
-                                <a class="btn  btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i class="fab fa-twitter"></i></a>
-                                <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i class="fab fa-facebook-f"></i></a>
-                                <a class="btn btn-outline-secondary me-2 btn-md-square rounded-circle" href=""><i class="fab fa-youtube"></i></a>
-                                <a class="btn btn-outline-secondary btn-md-square rounded-circle" href=""><i class="fab fa-linkedin-in"></i></a>
-                            </div>
-                        </div>
                     </div>
                 </div>
-                <div class="row g-5">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="footer-item">
-                            <h4 class="text-light mb-3">İnsanlar Neden Bizi Seviyor?</h4>
-                            <p class="mb-4">Yıllardan gelen daimi müşterilerimiz tüm ürünlerimizi gördüğü için insanlar bize güveniyor.</p>
-                            <a href="" class="btn border-secondary py-2 px-4 rounded-pill text-primary">Devamını Oku</a>
-                        </div>
+            </div>
+            <div class="row g-5">
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-item">
+                        <h4 class="text-light mb-3">İnsanlar Neden Bizi Seviyor?</h4>
+                        <p class="mb-4">
+                            Yıllardan gelen daimi müşterilerimiz tüm ürünlerimizi gördüğü için insanlar bize
+                            güveniyor.
+                        </p>
+                        <a href="" class="btn border-secondary py-2 px-4 rounded-pill text-primary">Devamını Oku</a>
                     </div>
-                    <div class="col-lg-3 col-md-6">text-light
-                        <div class="d-flex flex-column text-start footer-item">
-                            <h4 class="text-light mb-3">Mağaza Bilgisi</h4>
-                            <a class="btn-link" href="">Hakkımızda</a>
-                            <a class="btn-link" href="">Bize Ulaşın</a>
-                            <a class="btn-link" href="">Gizlilik Politikası</a>
-                            <a class="btn-link" href="">Şartlar Ve Koşullar</a>
-                            <a class="btn-link" href="">İade Politikası</a>
-                            <a class="btn-link" href="">SSS Ve Yardım</a>
-                        </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="d-flex flex-column text-start footer-item">
+                        <h4 class="text-light mb-3">Mağaza Bilgisi</h4>
+                        <a class="btn-link" href="">Hakkımızda</a>
+                        <a class="btn-link" href="">Bize Ulaşın</a>
+                        <a class="btn-link" href="">Gizlilik Politikası</a>
+                        <a class="btn-link" href="">Şartlar Ve Koşullar</a>
+                        <a class="btn-link" href="">İade Politikası</a>
+                        <a class="btn-link" href="">SSS Ve Yardım</a>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="d-flex flex-column text-start footer-item">
-                            <h4 class="text-light mb-3">Hesap</h4>
-                            <a class="btn-link" href="">Hesabım</a>
-                            <a class="btn-link" href="">Mağaza Ayrıntıları</a>
-                            <a class="btn-link" href="">Alışveriş Sepeti</a>
-                            <a class="btn-link" href="">İstek Listesi</a>
-                            <a class="btn-link" href="">Sipariş Geçmişi</a>
-                            <a class="btn-link" href="">Uluslararası Siparişler</a>
-                        </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="d-flex flex-column text-start footer-item">
+                        <h4 class="text-light mb-3">Hesap</h4>
+                        <a class="btn-link" href="">Hesabım</a>
+                        <a class="btn-link" href="">Mağaza Ayrıntıları</a>
+                        <a class="btn-link" href="">Alışveriş Sepeti</a>
+                        <a class="btn-link" href="">İstek Listesi</a>
+                        <a class="btn-link" href="">Sipariş Geçmişi</a>
+                        <a class="btn-link" href="">Uluslararası Siparişler</a>
                     </div>
-                    <div class="col-lg-3 col-md-6">
-                        <div class="footer-item">
-                            <h4 class="text-light mb-3">Temas Etmek</h4>
-                            <p>Adres: 1.sokak beylikdüzü/istanbul</p>
-                            <p>Email: enessolak@gmail.com</p>
-                            <p>Telefon Numarası: 0536 393 45 25</p>
-                            <p>Ödeme Kabul Edildi</p>
-                            <img src="/img/payment.png" class="img-fluid" alt="">
-                        </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="footer-item">
+                        <h4 class="text-light mb-3">Temas Etmek</h4>
+                        <p>Adres: 1.sokak beylikdüzü/istanbul</p>
+                        <p>Email: enessolak@gmail.com</p>
+                        <p>Telefon Numarası: 0536 393 45 25</p>
+                        <p>Ödeme Kabul Edildi</p>
+                        <img src="/img/payment.png" class="img-fluid" alt="" />
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Footer End -->
-
-        <!-- Copyright Start -->
-        <div class="container-fluid copyright bg-dark py-4">
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
-                        <span class="text-light"><a href="#"><i class="fas fa-copyright text-light me-2"></i>Site Adınız</a>, Tamamı Saklıdır.</span>
-                    </div>
-                    <div class="col-md-6 my-auto text-center text-md-end text-white">
-                        <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
-                        <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
-                        <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
-                        Tarafından Tasarlandı <a class="border-bottom" href="https://htmlcodex.com">HTML Solex</a>
-                    </div>
+    </div>
+    <!-- Footer End -->
+    <!-- Copyright -->
+    <div class="container-fluid copyright bg-dark py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 text-center text-md-start mb-3 mb-md-0">
+                    <span class="text-light">
+                        <a href="#">
+                            <i class="fas fa-copyright text-light me-2"></i>Site
+                            Adınız
+                        </a>, Tamamı Saklıdır.
+                    </span>
+                </div>
+                <div class="col-md-6 my-auto text-center text-md-end text-white">
+                    Tarafından Tasarlandı <a class="border-bottom" href="https://htmlcodex.com">HTML Solex</a>
                 </div>
             </div>
         </div>
-        <!-- Copyright End -->
+    </div>
+    <!-- Copyright End -->
+    <!-- Back to Top -->
+    <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top">
+        <i class="fa fa-arrow-up"></i>
+    </a>
 
-
-
-        <!-- Back to Top -->
-        <a href="#" class="btn btn-primary border-3 border-primary rounded-circle back-to-top"><i class="fa fa-arrow-up"></i></a>   
-
-        
     <!-- JavaScript Libraries -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -243,46 +290,12 @@
     <!-- Template Javascript -->
     <script src="~/js/main.js"></script>
 
-
     <script>
-        var detail = document.getElementById("Detail");
-        detail.onclick = function () {
-            detail.classList.add("active");
-        }
-    </script>
-
-    <script>
-        function getCartFromCookie() {
-            var name = "cart=";
-            var decodedCookie = decodeURIComponent(document.cookie);
-            var ca = decodedCookie.split(';');
-            for (var i = 0; i < ca.length; i++) {
-                var c = ca[i].trim();
-                if (c.indexOf(name) == 0) {
-                    try {
-                        return JSON.parse(c.substring(name.length, c.length));
-                    } catch {
-                        return [];
-                    }
-                }
+        window.addEventListener('load', function () {
+            var spinner = document.getElementById('spinner');
+            if (spinner) {
+                spinner.classList.remove('show');
             }
-            return [];
-        }
-
-        function updateCartIcon() {
-            var cartItems = getCartFromCookie();
-            var totalCount = 0;
-            cartItems.forEach(function (item) {
-                totalCount += item.Quantity;
-            });
-            var countSpan = document.getElementById('cartItemCount');
-            if (countSpan) {
-                countSpan.textContent = totalCount;
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            updateCartIcon();
         });
     </script>
 
@@ -304,14 +317,14 @@
 
             cart.forEach(item => {
                 container.append(`
-                        <div class="d-flex align-items-center mb-2">
-                            <img src="/${item.ImageUrl}" alt="${item.Name}" style="width:40px; height:40px; object-fit:cover; margin-right:10px; border-radius:4px;" />
-                            <div>
-                                <p class="mb-0">${item.Name}</p>
-                                <small>Adet: ${item.Quantity}</small>
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="/${item.ImageUrl}" alt="${item.Name}" style="width:40px; height:40px; object-fit:cover; margin-right:10px; border-radius:4px;" />
+                                <div>
+                                    <p class="mb-0">${item.Name}</p>
+                                    <small>Adet: ${item.Quantity}</small>
+                                </div>
                             </div>
-                        </div>
-                    `);
+                        `);
             });
         }
 
@@ -331,7 +344,7 @@
         });
     </script>
 
-
-    </body>
+    @RenderSection("Scripts", required: false)
+</body>
 
 </html>

@@ -1,6 +1,8 @@
-﻿using eCommerce.Controllers;
+﻿    using eCommerce.Controllers;
 using eCommerce.DATA.Entity;
 using eCommerce.Dtos;
+using System.ComponentModel.DataAnnotations;
+
 
 namespace eCommerce.Models
 {
@@ -30,4 +32,8 @@ namespace eCommerce.Models
             get; set;
         }
     }
+    
+
+
+
 }

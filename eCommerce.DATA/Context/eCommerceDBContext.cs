@@ -174,6 +174,8 @@ public partial class eCommerceDBContext : DbContext
             entity.Property(e => e.FirstName).HasMaxLength(50);
             entity.Property(e => e.LastName).HasMaxLength(50);
             entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.ResetToken).HasMaxLength(255);
+            entity.Property(e => e.ResetTokenExpires).HasColumnType("datetime");
         });
 
         OnModelCreatingPartial(modelBuilder);

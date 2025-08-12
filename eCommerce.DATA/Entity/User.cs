@@ -17,6 +17,10 @@ public partial class User
 
     public DateTime? CreatedAt { get; set; }
 
+    public string? ResetToken { get; set; }
+
+    public DateTime? ResetTokenExpires { get; set; }
+
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
 
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
