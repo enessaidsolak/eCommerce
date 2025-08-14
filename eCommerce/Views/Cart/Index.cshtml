@@ -1,6 +1,10 @@
 ﻿@model List<CartItemModel>
 
-<!-- Single Page Header start -->
+<!-- JavaScript Libraries -->
+@* <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> *@@* 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script> *@
+
+<!-- Single Page Header start --> 
 <div class="container-fluid page-header py-5">
     <h1 class="text-center text-white display-6">Cart</h1>
     <ol class="breadcrumb justify-content-center mb-0">
@@ -18,12 +22,12 @@
             <table class="table">
                 <thead>
                     <tr>
-                        <th scope="col">Products</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Price (₺)</th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Total (₺)</th>
-                        <th scope="col">Handle</th>
+                        <th scope="col">Ürünler</th>
+                        <th scope="col">Ürün Adı</th>
+                        <th scope="col">Fiyat (₺)</th>
+                        <th scope="col">Adet</th>
+                        <th scope="col">Toplam Fiyat (₺)</th>
+                        <th scope="col">Sil</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,7 +39,6 @@
                                     <a href="@Url.Action("Index", "Home", new { idOrName = item.ProductId })">
                                         <div class="fruite-img">
                                             <img src="/@item.ImageUrl" class="img-fluid w-100 rounded-top" style="height:150px; width:150px;" alt="@item.ProductName">
-
                                         </div>
                                     </a>
                                 </div>
@@ -73,10 +76,6 @@
             </table>
         </div>
 
-       
-
-
-
         @{
             decimal subtotal = Model.Sum(x => x.Price * x.Quantity);
             decimal shipping = 3;
@@ -104,7 +103,6 @@
                             <h5 class="mb-0 me-4">Subtotal:</h5>
                             <p class="mb-0">@subtotal.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
                         </div>
-
                         @if (discountAmount > 0)
                         {
                             <div class="d-flex justify-content-between mb-2">
@@ -112,12 +110,10 @@
                                 <p class="mb-0 text-success">-@discountAmount.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
                             </div>
                         }
-
                         <div class="d-flex justify-content-between mb-2">
                             <h5 class="mb-0 me-4">Shipping:</h5>
                             <p class="mb-0">₺3,00</p>
                         </div>
-
                         <p class="mb-0 text-end">Shipping to Turkey.</p>
                     </div>
 
@@ -130,205 +126,81 @@
                 </div>
             </div>
         </div>
+    </div>
+</div>
 
-
-
-<!-- Cart Page End -->
-
-<!-- jQuery -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<!-- JS -->
 <script>
-    $(function () {
-        function formatCurrency(value) {
-            return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
-        }
+$(document).ready(function () {
 
-        function parseCurrency(value) {
-            value = value.replace('₺', '').trim().replace(/\./g, '').replace(',', '.');
-            return parseFloat(value);
-        }
+    function parseCurrency(value) {
+        value = value.replace('₺', '').trim().replace(/\./g, '').replace(',', '.');
+        return parseFloat(value);
+    }
 
-        function updateRowTotal(container, quantity) {
-            var productRow = container.closest('tr');
-            var priceText = productRow.find('.price-text').text();
-            var price = parseCurrency(priceText);
-            var totalPrice = price * quantity;
-            productRow.find('.item-total-price').text(formatCurrency(totalPrice));
-        }
+    function formatCurrency(value) {
+        return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+    }
 
-        function updateCartTotal() {
-            var subtotal = 0;
-            $('tbody tr').each(function () {
-                var totalText = $(this).find('.item-total-price').text();
-                subtotal += parseCurrency(totalText);
-            });
-
-            $('.subtotal-price').text(formatCurrency(subtotal));
-            $('.total-price').text(formatCurrency(subtotal + 3)); // Kargo sabit ₺3
-        }
-
-        function sendUpdateQuantity(productId, quantity, container) {
-            $.ajax({
-                url: '/Cart/UpdateQuantity',
-                type: 'POST',
-                data: {
-                    id: productId,
-                    quantity: quantity
-                },
-                success: function (response) {
-                    if (response.success) {
-                        if (quantity === 0) {
-                            container.closest('tr').remove();
-                            updateCartTotal();
-                        }
-                        else {
-                            updateRowTotal(container, quantity);
-                            updateCartTotal();
-                        }
-
-                        // 🆕 Layout'taki ikon ve sepet önizleme güncelle
-                        if (typeof updateCartIcon === "function") updateCartIcon();
-                        if (typeof loadCartPreview === "function") loadCartPreview();
-                    } else {
-                        alert("Ürün bulunamadı.");
-                    }
-                },
-                error: function () {
-                    alert("Bir hata oluştu.");
-                }
-            });
-        }
-
-
-        // Yeni: Miktara göre butonları aktif/pasif yapar
-        function updateButtonsState() {
-            $('tbody tr').each(function () {
-                var quantityInput = $(this).find('.quantity-input');
-                var quantity = parseInt(quantityInput.val()) || 1;
-
-                var btnMinus = $(this).find('.btn-minus');
-                // Artı butonu hep açık kalsın, istersen onun için de işlem yapabilirsin.
-
-                if (quantity <= 1) {
-                    btnMinus.css('display', 'none');  // gizle
-                } else {
-                    btnMinus.css('display', 'inline-block');  // göster (veya 'inline' da olabilir)
-                }
-            });
-        }
-
-        $('.btn-plus').off('click').on('click', function () {
-            var container = $(this).closest('.input-group.quantity');
-            var input = container.find('.quantity-input');
-            var quantity = parseInt(input.val()) || 0;
-            quantity += 1;
-            input.val(quantity);
-            updateRowTotal(container, quantity);
-            updateCartTotal();
-
-            var productId = $(this).data('id');
-            sendUpdateQuantity(productId, quantity, container);
-
-            updateButtonsState(); // buraya ekledik
+    function updateCartTotal() {
+        var subtotal = 0;
+        $('tbody tr').each(function () {
+            var totalText = $(this).find('.item-total-price').text();
+            subtotal += parseCurrency(totalText);
         });
+        $('.subtotal-price').text(formatCurrency(subtotal));
+        $('.total-price').text(formatCurrency(subtotal + 3));
+    }
 
-        $('.btn-minus').off('click').on('click', function () {
-            var container = $(this).closest('.input-group.quantity');
-            var input = container.find('.quantity-input');
-            var quantity = parseInt(input.val()) || 0;
-            quantity = Math.max(0, quantity - 1);
-            input.val(quantity);
-            updateRowTotal(container, quantity);
-            updateCartTotal();
-
-            var productId = $(this).data('id');
-            sendUpdateQuantity(productId, quantity, container);
-
-            updateButtonsState(); // buraya ekledik
-        });
-
-        // 🆕 Elle input kutusuna yazma durumunda güncelleme
-        $('.quantity-input').off('change').on('change', function () {
-            var input = $(this);
-            var container = input.closest('.input-group.quantity');
-            var quantity = parseInt(input.val());
-
-            if (isNaN(quantity) || quantity < 1) quantity = 1; // Minimum 1
-            input.val(quantity);
-
-            var productId = input.data('id');
-            updateRowTotal(container, quantity);
-            updateCartTotal();
-            sendUpdateQuantity(productId, quantity, container);
-
-            updateButtonsState(); // buraya ekledik
-        });
-
-        // 🆕 Sadece rakam girilmesini sağla
-        $('.quantity-input').on('keydown', function (e) {
-            var allowedKeys = [8, 9, 13, 37, 38, 39, 40, 46]; // Backspace, Tab, Enter, Ok tuşları, Delete
-            if (
-                allowedKeys.indexOf(e.keyCode) !== -1 ||
-                (e.keyCode >= 48 && e.keyCode <= 57) || // üst satır rakamlar
-                (e.keyCode >= 96 && e.keyCode <= 105)   // numpad rakamlar
-            ) {
-                return; // izin ver
-            } else {
-                e.preventDefault(); // diğer tuşları engelle
-            }
-        });
-
-        $('.btn-remove-item').off('click').on('click', function () {
-            if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
-                var productId = $(this).data('id');
-                var container = $(this).closest('tr');
-                $.ajax({
-                    url: '/Cart/RemoveFromCart',
-                    type: 'POST',
-                    data: { id: productId },
-                    success: function () {
-                        container.remove();
-                        updateCartTotal();
-                        updateButtonsState(); // silmeden sonra butonları güncelle
-                    },
-                    error: function () {
-                        alert("Silme işleminde hata oluştu.");
-                    }
-                });
-            }
-        });
-
-        // Sayfa yüklendiğinde toplamları ve buton durumlarını güncelle
-        updateCartTotal();
-        updateButtonsState();
-    });
-</script>
-x
-<script>
-    $('#applyCouponBtn').click(function () {
-        var code = $('#couponCode').val();
-
+    function handleBasketSize() {
         $.ajax({
-            url: '/Cart/ApplyCoupon',
-            type: 'POST',
-            data: { couponCode: code },
-            success: function (response) {
-                if (response.success) {
-                    $('#couponMessage').text(response.message);
-                    $('#totalAmount').text(response.newTotal + ' ₺');
-
-                    // İstersen indirimi ayrı da gösterebilirsin:
-                    $('#discountAmount').remove();
-                    $('#totalRow').before(`<tr id="discountAmount"><td colspan="3">İndirim:</td><td class="text-end text-danger">-${response.discountAmount} ₺</td></tr>`);
+            url: '/Cart/GetBasketSize',
+            type: 'GET',
+            success: function(size) {
+                var countElem = $('#cartItemCount');
+                if (size === 0) {
+                    countElem.text(0).hide();
+                    $('#cartPreview').html('<p>Sepetiniz boş</p>');
                 } else {
-                    $('#couponMessage').text(response.message).css('color', 'red');
+                    countElem.text(size).show();
                 }
-            },
-            error: function () {
-                $('#couponMessage').text("Bir hata oluştu.").css('color', 'red');
             }
         });
-    });
-</script>
+    }
 
+    function updateButtonsState() {
+        $('tbody tr').each(function () {
+            var quantityInput = $(this).find('.quantity-input');
+            var quantity = parseInt(quantityInput.val()) || 1;
+            var btnMinus = $(this).find('.btn-minus');
+            btnMinus.toggle(quantity > 1);
+        });
+    }
+
+    function removeItem(button) {
+        if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
+            var productId = $(button).data('id');
+            var container = $(button).closest('tr');
+            $.ajax({
+                url: '/Cart/RemoveFromCart',
+                type: 'POST',
+                data: { id: productId },
+                success: function(response) {
+                    if(response.success){
+                        container.remove();
+                        $('div[data-product-id="'+productId+'"]').remove();
+                        updateCartTotal();
+                        handleBasketSize();
+                        updateButtonsState();
+                    }
+                }
+            });
+        }
+    }
+
+    $(document).on('click', '.btn-remove-item', function() {
+        removeItem(this);
+    });
+
+});
+</script>

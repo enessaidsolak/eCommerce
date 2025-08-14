@@ -33,7 +33,7 @@ namespace eCommerce.Controllers
 
             if (existingItem != null)
             {
-                existingItem.Quantity = 1; // **Burada 1 yapıyoruz, eski quantity kalmasın**
+                existingItem.Quantity = existingItem.Quantity + 1;
             }
             else
             {
@@ -61,7 +61,8 @@ namespace eCommerce.Controllers
                 cartItems.Remove(item);
                 SaveCartToCookie(cartItems);
             }
-            return RedirectToAction("Index");
+
+            return Json(new { success = true });
         }
 
         [HttpPost]
@@ -91,9 +92,19 @@ namespace eCommerce.Controllers
         private List<CartItemModel> GetCartItemsFromCookie()
         {
             var cartJson = Request.Cookies["cart"];
-            return string.IsNullOrEmpty(cartJson)
-                ? new List<CartItemModel>()
-                : JsonSerializer.Deserialize<List<CartItemModel>>(cartJson) ?? new List<CartItemModel>();
+
+            if (string.IsNullOrWhiteSpace(cartJson))
+                return new List<CartItemModel>();
+
+            try
+            {
+                return JsonSerializer.Deserialize<List<CartItemModel>>(cartJson) ?? new List<CartItemModel>();
+            }
+            catch
+            {
+                // Cookie bozuk veya format hatalıysa boş liste dön
+                return new List<CartItemModel>();
+            }
         }
 
         private void SaveCartToCookie(List<CartItemModel> cartItems)
@@ -162,6 +173,13 @@ namespace eCommerce.Controllers
             return View("Index", cartItems); // Sepet sayfasına geri dön
         }
 
+        [HttpGet]
+        public IActionResult GetBasketSize()
+        {
+            var cartItems = GetCartItemsFromCookie();
+            var totalCount = cartItems.Sum(x => x.Quantity);
+            return Json(totalCount);
+        }
 
 
 

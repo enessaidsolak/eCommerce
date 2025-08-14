@@ -99,13 +99,15 @@
 
                         <!-- Sepet -->
                         <div class="position-relative me-4 my-auto dropdown">
-                            <a href="#" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Sepetiniz">
+                            <a href="#"  onclick="showCart()" id="cartDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Sepetiniz">
                                 <i class="fa fa-shopping-bag fa-2x"></i>
                                 <span id="cartItemCount"
                                       class="position-absolute bg-secondary rounded-circle d-flex align-items-center justify-content-center text-dark px-1"
                                       style="top: -5px; left: 15px; height: 20px; min-width: 20px;">0</span>
                             </a>
-                            <ul class="dropdown-menu dropdown-menu-end p-3" aria-labelledby="cartDropdown"
+
+
+                            <ul class="dropdown-menu dropdown-menu-end p-3" id="showCart" aria-labelledby="cartDropdown"
                                 style="min-width: 300px; max-height: 400px; overflow-y: auto;">
                                 <li>
                                     <div id="cartPreview">
@@ -301,12 +303,17 @@
 
     <script>
         function getCookie(name) {
+            // debugger;
             let v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
             return v ? decodeURIComponent(v[2]) : null;
+        }
+        function showCart () {
+             $("#showCart").toggleClass("show");
         }
 
         function loadCartPreview() {
             let cart = JSON.parse(getCookie('cart') || '[]');
+            console.log("cart",cart)
             let container = $('#cartPreview');
             container.empty();
 
@@ -317,17 +324,53 @@
 
             cart.forEach(item => {
                 container.append(`
-                            <div class="d-flex align-items-center mb-2">
+                            <div class="d-flex align-items-center mb-2" data-product-id="${item.ProductId}" data-id="${item.ProductId}">
                                 <img src="/${item.ImageUrl}" alt="${item.Name}" style="width:40px; height:40px; object-fit:cover; margin-right:10px; border-radius:4px;" />
                                 <div>
                                     <p class="mb-0">${item.Name}</p>
                                     <small>Adet: ${item.Quantity}</small>
                                 </div>
+                                     <button class="btn btn-md rounded-circle bg-light border mt-4 btn-remove-item" onclick=" removeItem(this)" data-id="${item.ProductId}" title="Remove item">
+                                    <i class="fa fa-times text-danger"></i>
+                                </button>
                             </div>
                         `);
             });
         }
+        function removeItem(button) {
+            debugger;
+            if(confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
+                var productId = $(button).data('id');
 
+                // Table'daki tr
+                var tableRow = $('tr[data-product-id="'+productId+'"]');
+
+                // Dropdown'daki div (cart preview)
+                var dropdownItem = $('div[data-product-id="'+productId+'"]');
+                console.log("dropdownItem",dropdownItem)
+
+                $.ajax({
+                    url: '/Cart/RemoveFromCart',
+                    type: 'POST',
+                    data: { id: productId },
+                    success: function(response) {
+                        if(response.success){
+                            tableRow.remove();       // Cart sayfasından kaldır
+                            dropdownItem.remove();   // Dropdown’dan kaldır
+                            updateCartTotal();
+                            handleBasketSize();
+                            updateButtonsState();
+                        }
+                    },
+                    error: function() { 
+                        alert("Silme işleminde hata oluştu."); 
+                    }
+                });
+            }
+        }
+
+
+       
         function updateCartIcon() {
             let cart = JSON.parse(getCookie('cart') || '[]');
             let totalCount = 0;
@@ -338,13 +381,170 @@
             }
         }
 
+         // Cart sayfasındaki silme
+  
         $(document).ready(function () {
             loadCartPreview();
             updateCartIcon();
+            getCookie('cart');
         });
     </script>
 
     @RenderSection("Scripts", required: false)
+
+    
+
+<script>
+    // Fonksiyonları global yap
+    window.formatCurrency = function(value) {
+        return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+    };
+
+    window.parseCurrency = function(value) {
+        value = value.replace('₺', '').trim().replace(/\./g, '').replace(',', '.');
+        return parseFloat(value);
+    };
+
+    window.updateCartTotal = function() {
+        var subtotal = 0;
+        $('tbody tr').each(function () {
+            var totalText = $(this).find('.item-total-price').text();
+            subtotal += parseCurrency(totalText);
+        });
+
+        $('.subtotal-price').text(formatCurrency(subtotal));
+        $('.total-price').text(formatCurrency(subtotal + 3)); // Kargo sabit ₺3
+    };
+
+    window.updateButtonsState = function() {
+        $('tbody tr').each(function () {
+            var quantityInput = $(this).find('.quantity-input');
+            var quantity = parseInt(quantityInput.val()) || 1;
+            var btnMinus = $(this).find('.btn-minus');
+            if (quantity <= 1) btnMinus.hide();
+            else btnMinus.show();
+        });
+    };
+
+    window.handleBasketSize = function() {
+        $.ajax({
+            url: '/Cart/GetBasketSize',
+            type: 'GET',
+            success: function(size) {
+                var countElem = $('#cartItemCount');
+                if (size === 0) {
+                    countElem.text(0).hide();
+                    $('#cartPreview').html('<p>Sepetiniz boş</p>');
+                } else {
+                    countElem.text(size).show();
+                }
+            },
+            error: function() {
+                console.error("Sepet boyutu alınamadı.");
+            }
+        });
+    };
+
+    window.updateRowTotal = function(container, quantity) {
+        var productRow = container.closest('tr');
+        var priceText = productRow.find('.price-text').text();
+        var price = parseCurrency(priceText);
+        var totalPrice = price * quantity;
+        productRow.find('.item-total-price').text(formatCurrency(totalPrice));
+    };
+
+    window.sendUpdateQuantity = function(productId, quantity, container) {
+        $.ajax({
+            url: '/Cart/UpdateQuantity',
+            type: 'POST',
+            data: { id: productId, quantity: quantity },
+            success: function(response) {
+                if (response.success) {
+                    if (quantity === 0) {
+                        container.closest('tr').remove();
+                        $('div[data-product-id="'+productId+'"]').remove(); // Dropdown’dan da kaldır
+                        updateCartTotal();
+                    } else {
+                        updateRowTotal(container, quantity);
+                        updateCartTotal();
+                    }
+
+                    if (typeof updateCartIcon === "function") updateCartIcon();
+                    if (typeof loadCartPreview === "function") loadCartPreview();
+                } else {
+                    alert("Ürün bulunamadı.");
+                }
+            },
+            error: function() {
+                alert("Bir hata oluştu.");
+            }
+        });
+    };
+
+    // Document ready
+    $(function () {
+        // Plus / Minus
+        $('.btn-plus').off('click').on('click', function() {
+            var container = $(this).closest('.input-group.quantity');
+            var input = container.find('.quantity-input');
+            var quantity = parseInt(input.val()) || 0;
+            quantity += 1;
+            input.val(quantity);
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+            var productId = $(this).data('id');
+            sendUpdateQuantity(productId, quantity, container);
+            updateButtonsState();
+        });
+
+        $('.btn-minus').off('click').on('click', function() {
+            var container = $(this).closest('.input-group.quantity');
+            var input = container.find('.quantity-input');
+            var quantity = parseInt(input.val()) || 0;
+            quantity = Math.max(0, quantity - 1);
+            input.val(quantity);
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+            var productId = $(this).data('id');
+            sendUpdateQuantity(productId, quantity, container);
+            updateButtonsState();
+        });
+
+        $('.quantity-input').off('change').on('change', function() {
+            var input = $(this);
+            var container = input.closest('.input-group.quantity');
+            var quantity = parseInt(input.val());
+            if (isNaN(quantity) || quantity < 1) quantity = 1;
+            input.val(quantity);
+            var productId = input.data('id');
+            updateRowTotal(container, quantity);
+            updateCartTotal();
+            sendUpdateQuantity(productId, quantity, container);
+            updateButtonsState();
+        });
+
+        $('.quantity-input').on('keydown', function(e) {
+            var allowedKeys = [8, 9, 13, 37, 38, 39, 40, 46];
+            if (
+                allowedKeys.indexOf(e.keyCode) !== -1 ||
+                (e.keyCode >= 48 && e.keyCode <= 57) ||
+                (e.keyCode >= 96 && e.keyCode <= 105)
+            ) return;
+            else e.preventDefault();
+        });
+
+     
+
+        // Sayfa yüklendiğinde toplam ve butonları güncelle
+        updateCartTotal();
+        updateButtonsState();
+        handleBasketSize();
+    });
+</script>
+
+
+
+    
 </body>
 
 </html>

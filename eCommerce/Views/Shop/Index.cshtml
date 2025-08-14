@@ -72,18 +72,31 @@
                     </div>
                     <div class="col-lg-9">
                         <div class="row g-4 justify-content-center">
-                            <div class="row">
+                         
                                 @foreach (var product in Model.Products)
                                 {
-                                    <div class="col-md-4 mb-4">
-                                        <h4>@product.ProductName</h4>
-                                        <p>Kategori: @product.Category?.CategoryName</p>
-                                    <img src="~/@product.ImageUrl" alt="@product.ProductName" class="img-fluid" />
-                                        <p>Fiyat: @product.Price ₺</p>
-                                        <a href="@Url.Action("Detail", "Shop", new { id = product.ProductId })">Detay</a>
+                            <div class="col-md-6 col-lg-6 col-xl-4">
+                                <div class="rounded position-relative fruite-item">
+                                    <div class="fruite-img">
+                                            <img src="~/@product.ImageUrl" class="img-fluid w-100 rounded-top" alt="">
                                     </div>
-                                }
+                                        <div class="text-white bg-secondary px-3 py-1 rounded position-absolute" style="top: 10px; left: 10px;">@product.Category?.CategoryName</div>
+                                    <div class="p-4 border border-secondary border-top-0 rounded-bottom">
+                                        <h4>
+    <a href="@Url.Action("Details", "Product", new { id = product.ProductId })" class="text-decoration-none text-dark">
+        @product.ProductName
+    </a>
+</h4>
+                                    @*     <p>Lorem ipsum dolor sit amet consectetur adipisicing elit sed do eiusmod te incididunt</p> *@
+                                        <div class="d-flex justify-content-between flex-lg-wrap">
+                                                <p class="text-dark fs-5 fw-bold mb-0">Fiyat: @product.Price ₺</p>
+                                            <a asp-controller="Cart" asp-action="AddToCart" asp-route-id="@product.ProductId" class="btn border border-secondary rounded-pill px-3 text-primary"><i class="fa fa-shopping-bag me-2 text-primary"></i> Sepete Ekle</a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                            }
+
 
 
 @* 
