@@ -10,6 +10,7 @@ public class ShopController : Controller
 {
     private readonly eCommerceDBContext db;
 
+
     public ShopController(eCommerceDBContext context)
     {
         db = context;
@@ -53,5 +54,20 @@ public class ShopController : Controller
         model.Products = query.ToList();
         return View(model);
     }
+    [HttpGet]
+    public IActionResult LiveSearch(string q)
+    {
+        if (string.IsNullOrWhiteSpace(q))
+            return Json(new List<object>());
+
+        var results = db.Products
+            .Where(p => p.ProductName.Contains(q))
+            .Select(p => new { productId = p.ProductId, productName = p.ProductName })
+            .ToList();
+
+        return Json(results);
+    }
+
+
 
 }

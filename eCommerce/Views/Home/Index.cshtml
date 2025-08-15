@@ -441,24 +441,28 @@
             @foreach (var item in Model.LatestProducts)
             {
                 <div class="border border-primary rounded position-relative vesitable-item">
-                    <div class="vesitable-img">
-                        <img src="@item.ImageUrl" class="img-fluid w-100 rounded-top" alt="">
+                    <a href="@Url.Action("Details", "Product", new { idOrName = item.ProductId })">
+                        <div class="vesitable-img">
+                            <img src="@item.ImageUrl" class="img-fluid w-100 rounded-top" alt="@item.ProductName" style="width:500px!important; height:300px;">
+                        </div>
+                    </a>
+                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">
+                        @item.ProductName
                     </div>
-                    <div class="text-white bg-primary px-3 py-1 rounded position-absolute" style="top: 10px; right: 10px;">@item.ProductName</div>
                     <div class="p-4 rounded-bottom">
                         <h4>@item.ProductName</h4>
                         <p>Kategori: @item.Category?.CategoryName</p>
-                        <p>Fiyat: @item.Price ₺</p>
+                        <p>Fiyat: @(Convert.ToDecimal(item.Price).ToString("C", new System.Globalization.CultureInfo("tr-TR")))</p>
                         <a href="@Url.Action("AddToCart", "Cart", new { id = item.ProductId })" class="btn border border-secondary rounded-pill px-3 text-primary">
                             <i class="fa fa-shopping-bag me-2 text-primary"></i> Sepete Ekle
                         </a>
                     </div>
                 </div>
             }
-            
         </div>
     </div>
 </div>
+
 <!-- Vesitable Shop End -->
 <!-- Banner Section Start-->
 @* <div class="container-fluid banner bg-secondary my-5">
@@ -501,9 +505,13 @@
             {
                 <div class="col-md-6 col-lg-6 col-xl-3">
                     <div class="text-center">
-                        <img src="@item.ImageUrl" class="img-fluid w-100 rounded-top" alt="@item.ProductName">
+                        <a href="@Url.Action("Details", "Product", new { idOrName = item.ProductId })">
+                            <img src="@item.ImageUrl" class="img-fluid w-100 rounded-top product-img" alt="@item.ProductName" style="width:500px!important; height:300px;">
+                        </a>
                         <div class="py-4">
-                            <a href="#" class="h5">@item.ProductName</a>
+                            <a href="@Url.Action("Details", "Product", new { idOrName = item.ProductId })" class="h5 d-block mb-2">
+                                @item.ProductName
+                            </a>
                             <div class="d-flex my-3 justify-content-center">
                                 <i class="fas fa-star text-primary"></i>
                                 <i class="fas fa-star text-primary"></i>
@@ -522,6 +530,8 @@
         </div>
     </div>
 </div>
+
+
 
 <!-- Bestsaler Product End -->
 <!-- Fact Start -->

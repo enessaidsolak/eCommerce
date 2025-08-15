@@ -32,6 +32,13 @@
 
     <!-- Custom Styles -->
     <link href="~/css/style.css" rel="stylesheet" />
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+
 </head>
 
 <body>
@@ -92,10 +99,28 @@
 
                     <div class="d-flex m-3 me-0 align-items-center">
                         <!-- Arama Butonu -->
-                        <button class="btn-search btn border border-secondary btn-md-square rounded-circle bg-white me-4"
-                                data-bs-toggle="modal" data-bs-target="#searchModal" aria-label="Search">
-                            <i class="fas fa-search text-primary"></i>
-                        </button>
+                        <form method="get" asp-controller="Shop" asp-action="Index" class="d-flex align-items-center ms-3">
+                            <input type="search" name="keyword" class="form-control rounded-pill"
+                                   placeholder="Ürün ara..." value="@(Context.Request.Query["keyword"])">
+                        </form>
+
+
+
+
+
+                        <!-- Sayfa sonunda modal -->
+                        <div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content p-3">
+                                    <input type="text" id="searchInput" class="form-control" placeholder="Ürün ara..." autofocus>
+                                    <ul id="searchResults" class="list-group mt-2"></ul>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+
 
                         <!-- Sepet -->
                         <div class="position-relative me-4 my-auto dropdown">
@@ -282,12 +307,7 @@
     </a>
 
     <!-- JavaScript Libraries -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/lib/easing/easing.min.js"></script>
-    <script src="~/lib/waypoints/waypoints.min.js"></script>
-    <script src="~/lib/lightbox/js/lightbox.min.js"></script>
-    <script src="~/lib/owlcarousel/owl.carousel.min.js"></script>
+
 
     <!-- Template Javascript -->
     <script src="~/js/main.js"></script>
@@ -337,8 +357,7 @@
                         `);
             });
         }
-        function removeItem(button) {
-            debugger;
+        function removeItem(button) { 
             if(confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
                 var productId = $(button).data('id');
 
@@ -484,31 +503,73 @@
     // Document ready
     $(function () {
         // Plus / Minus
-        $('.btn-plus').off('click').on('click', function() {
-            var container = $(this).closest('.input-group.quantity');
-            var input = container.find('.quantity-input');
-            var quantity = parseInt(input.val()) || 0;
-            quantity += 1;
-            input.val(quantity);
-            updateRowTotal(container, quantity);
-            updateCartTotal();
-            var productId = $(this).data('id');
-            sendUpdateQuantity(productId, quantity, container);
-            updateButtonsState();
-        });
+       $('.btn-plus').off('click').on('click', function() {
+    var container = $(this).closest('.input-group.quantity');
+    var input = container.find('.quantity-input');
+    var quantity = parseInt(input.val()) || 0;
+    quantity += 1;
+    input.val(quantity);
 
-        $('.btn-minus').off('click').on('click', function() {
-            var container = $(this).closest('.input-group.quantity');
-            var input = container.find('.quantity-input');
-            var quantity = parseInt(input.val()) || 0;
-            quantity = Math.max(0, quantity - 1);
-            input.val(quantity);
-            updateRowTotal(container, quantity);
-            updateCartTotal();
-            var productId = $(this).data('id');
-            sendUpdateQuantity(productId, quantity, container);
-            updateButtonsState();
+    var productId = $(this).data('id');
+
+    // Sepette var mı diye kontrol et
+    let cart = JSON.parse(getCookie('cart') || '[]');
+    let item = cart.find(x => x.ProductId == productId);
+
+    if(!item) {
+        // Sepette yoksa önce AddToCart çağır
+        $.post('/Cart/AddToCart', { id: productId }, function(res){
+            if(res.success){
+                sendUpdateQuantity(productId, quantity, container);
+            } else {
+                alert('Ürün sepete eklenemedi.');
+            }
         });
+    } else {
+        sendUpdateQuantity(productId, quantity, container);
+    }
+
+    updateRowTotal(container, quantity);
+    updateCartTotal();
+    updateButtonsState();
+});
+
+// Eksi butonu
+$('.btn-minus').off('click').on('click', function() {
+    var container = $(this).closest('.input-group.quantity');
+    var input = container.find('.quantity-input');
+    var quantity = parseInt(input.val()) || 0;
+    quantity = Math.max(0, quantity - 1);
+    input.val(quantity);
+
+    var productId = $(this).data('id');
+
+    // Sepette var mı kontrol et
+    let cart = JSON.parse(getCookie('cart') || '[]');
+    let item = cart.find(x => x.ProductId == productId);
+
+    if(!item && quantity > 0) {
+        // Ürün sepette yok ve quantity > 0 ise önce ekle
+        $.post('/Cart/AddToCart', { id: productId }, function(res){
+            if(res.success){
+                sendUpdateQuantity(productId, quantity, container);
+            } else {
+                alert('Ürün sepete eklenemedi.');
+            }
+        });
+    } else {
+        // Sepette varsa veya quantity 0 ise direkt güncelle
+        sendUpdateQuantity(productId, quantity, container);
+    }
+
+    updateRowTotal(container, quantity);
+    updateCartTotal();
+    updateButtonsState();
+});
+
+
+
+      
 
         $('.quantity-input').off('change').on('change', function() {
             var input = $(this);
@@ -533,6 +594,7 @@
             else e.preventDefault();
         });
 
+
      
 
         // Sayfa yüklendiğinde toplam ve butonları güncelle
@@ -541,10 +603,12 @@
         handleBasketSize();
     });
 </script>
+    
+</body>
+</html>
+
+
 
 
 
     
-</body>
-
-</html>
