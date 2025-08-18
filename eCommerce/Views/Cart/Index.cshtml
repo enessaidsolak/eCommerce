@@ -1,7 +1,7 @@
 ﻿@model List<CartItemModel>
 
 
-<!-- Single Page Header start --> 
+<!-- Single Page Header start -->
 <div class="container-fluid page-header py-5">
     <h1 class="text-center text-white display-6">Sepet</h1>
     <ol class="breadcrumb justify-content-center mb-0">
@@ -11,7 +11,6 @@
     </ol>
 </div>
 <!-- Single Page Header End -->
-
 <!-- Cart Page Start -->
 <div class="container-fluid py-5">
     <div class="container py-5">
@@ -72,7 +71,6 @@
                 </tbody>
             </table>
         </div>
-
         @{
             decimal subtotal = Model.Sum(x => x.Price * x.Quantity);
             decimal shipping = 3;
@@ -81,123 +79,169 @@
         }
 
         <div class="mt-5">
-            <form method="post" asp-action="ApplyCoupon" asp-controller="Cart">
-                <input type="text" name="couponCode" class="border-0 border-bottom rounded me-2 py-3 mb-4" placeholder="Coupon Code" />
-                <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="submit">Apply Coupon</button>
+            <form id="couponForm" method="post" asp-action="ApplyCoupon" asp-controller="Cart">
+                <input type="text" id="couponCode" name="couponCode" class="border-0 border-bottom rounded me-2 py-3 mb-4" placeholder="Kupon Kodu" />
+                <button class="btn border-secondary rounded-pill px-4 py-3 text-primary" type="submit">Kuponu Uygula</button>
             </form>
-            @if (!string.IsNullOrEmpty(ViewBag.CouponMessage as string))
-            {
-                <p class="text-danger">@ViewBag.CouponMessage</p>
-            }
+            <p id="couponMessage" class="text-danger">
+                @if (!string.IsNullOrEmpty(ViewBag.CouponMessage as string))
+                {
+                    @ViewBag.CouponMessage
+                }
+            </p>
         </div>
 
         <div class="row g-4 justify-content-end">
             <div class="col-sm-8 col-md-7 col-lg-6 col-xl-4">
                 <div class="bg-light rounded">
                     <div class="p-4">
-                        <h1 class="display-6 mb-4">Cart <span class="fw-normal">Total</span></h1>
+                        <h1 class="display-6 mb-4">Sepet <span class="fw-normal">Toplamı</span></h1>
+
+                        <!-- Subtotal -->
                         <div class="d-flex justify-content-between mb-2">
-                            <h5 class="mb-0 me-4">Subtotal:</h5>
-                            <p class="mb-0">@subtotal.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
+                            <h5 class="mb-0 me-4">Ara toplam:</h5>
+                            <p class="mb-0 subtotal-price">@subtotal.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
                         </div>
-                        @if (discountAmount > 0)
-                        {
-                            <div class="d-flex justify-content-between mb-2">
-                                <h5 class="mb-0 me-4">Discount:</h5>
-                                <p class="mb-0 text-success">-@discountAmount.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
-                            </div>
-                        }
+
+                        <!-- Discount (başlangıçta gizli) -->
+                        <div class="d-flex justify-content-between mb-2 discount-row" style="display:none;">
+                            <h5 class="mb-0 me-4">İndirim:</h5>
+                            <p class="mb-0 text-success discount-amount">0 ₺</p>
+                        </div>
+
+                        <!-- Shipping -->
                         <div class="d-flex justify-content-between mb-2">
-                            <h5 class="mb-0 me-4">Shipping:</h5>
+                            <h5 class="mb-0 me-4">Kargo Ücreti:</h5>
                             <p class="mb-0">₺3,00</p>
                         </div>
-                        <p class="mb-0 text-end">Shipping to Turkey.</p>
+                        <p class="mb-0 text-end">Türkiyeye kargo.</p>
                     </div>
 
                     <div class="py-4 mb-4 border-top border-bottom d-flex justify-content-between">
-                        <h5 class="mb-0 ps-4 me-4">Total</h5>
-                        <p class="mb-0">@totalAfterDiscount.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
+                        <h5 class="mb-0 ps-4 me-4">Toplam</h5>
+                        <p class="mb-0 total-price">@totalAfterDiscount.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
                     </div>
 
-                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Proceed Checkout</button>
+                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Ödeme işlemine devam et </button>
                 </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- JS -->
-<script>
-$(document).ready(function () {
+        <!-- JS -->
+        <script>
+            $(document).ready(function () {
 
-    function parseCurrency(value) {
-        value = value.replace('₺', '').trim().replace(/\./g, '').replace(',', '.');
-        return parseFloat(value);
-    }
-
-    function formatCurrency(value) {
-        return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
-    }
-
-    function updateCartTotal() {
-        var subtotal = 0;
-        $('tbody tr').each(function () {
-            var totalText = $(this).find('.item-total-price').text();
-            subtotal += parseCurrency(totalText);
-        });
-        $('.subtotal-price').text(formatCurrency(subtotal));
-        $('.total-price').text(formatCurrency(subtotal + 3));
-    }
-
-    function handleBasketSize() {
-        $.ajax({
-            url: '/Cart/GetBasketSize',
-            type: 'GET',
-            success: function(size) {
-                var countElem = $('#cartItemCount');
-                if (size === 0) {
-                    countElem.text(0).hide();
-                    $('#cartPreview').html('<p>Sepetiniz boş</p>');
-                } else {
-                    countElem.text(size).show();
+                function parseCurrency(value) {
+                    if (!value) return 0;
+                    value = value.replace('₺', '').trim().replace(/\./g, '').replace(',', '.');
+                    return parseFloat(value) || 0;
                 }
-            }
-        });
-    }
 
-    function updateButtonsState() {
-        $('tbody tr').each(function () {
-            var quantityInput = $(this).find('.quantity-input');
-            var quantity = parseInt(quantityInput.val()) || 1;
-            var btnMinus = $(this).find('.btn-minus');
-            btnMinus.toggle(quantity > 1);
-        });
-    }
+                function formatCurrency(value) {
+                    return value.toLocaleString('tr-TR', { style: 'currency', currency: 'TRY' });
+                }
 
-    function removeItem(button) {
-        if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
-            var productId = $(button).data('id');
-            var container = $(button).closest('tr');
-            $.ajax({
-                url: '/Cart/RemoveFromCart',
-                type: 'POST',
-                data: { id: productId },
-                success: function(response) {
-                    if(response.success){
-                        container.remove();
-                        $('div[data-product-id="'+productId+'"]').remove();
-                        updateCartTotal();
-                        handleBasketSize();
-                        updateButtonsState();
+                function updateCartTotal() {
+                    var subtotal = 0;
+                    $('tbody tr').each(function () {
+                        var totalText = $(this).find('.item-total-price').text();
+                        subtotal += parseCurrency(totalText);
+                    });
+
+                    $('.subtotal-price').text(formatCurrency(subtotal));
+
+                    var discount = parseCurrency($('.discount-amount').text()) || 0;
+                    $('.total-price').text(formatCurrency(subtotal - discount + 3));
+                }
+
+                function handleBasketSize() {
+                    $.ajax({
+                        url: '/Cart/GetBasketSize',
+                        type: 'GET',
+                        success: function (size) {
+                            var countElem = $('#cartItemCount');
+                            if (size === 0) {
+                                countElem.text(0).hide();
+                                $('#cartPreview').html('<p>Sepetiniz boş</p>');
+                            } else {
+                                countElem.text(size).show();
+                            }
+                        }
+                    });
+                }
+
+                function updateButtonsState() {
+                    $('tbody tr').each(function () {
+                        var quantityInput = $(this).find('.quantity-input');
+                        var quantity = parseInt(quantityInput.val()) || 1;
+                        var btnMinus = $(this).find('.btn-minus');
+                        btnMinus.toggle(quantity > 1);
+                    });
+                }
+
+                function removeItem(button) {
+                    if (confirm("Bu ürünü sepetten kaldırmak istediğinize emin misiniz?")) {
+                        var productId = $(button).data('id');
+                        var container = $(button).closest('tr');
+                        $.ajax({
+                            url: '/Cart/RemoveFromCart',
+                            type: 'POST',
+                            data: { id: productId },
+                            success: function (response) {
+                                if (response.success) {
+                                    container.remove();
+                                    $('div[data-product-id="' + productId + '"]').remove();
+                                    updateCartTotal();
+                                    handleBasketSize();
+                                    updateButtonsState();
+                                }
+                            }
+                        });
                     }
                 }
+
+                $(document).on('click', '.btn-remove-item', function () {
+                    removeItem(this);
+                });
+
+                // ----------------------------
+                // Kupon Formu Ajax Gönderimi
+                // ----------------------------
+                $('#couponForm').submit(function (e) {
+                    e.preventDefault();
+                    var couponCode = $('#couponCode').val();
+                    if (!couponCode) return;
+
+                    $.ajax({
+                        url: '/Cart/ApplyCouponAjax',
+                        type: 'POST',
+                        data: { couponCode: couponCode },
+                        success: function (response) {
+                            if (response.success) {
+                                $('#couponMessage').text(response.message).removeClass('text-danger').addClass('text-success');
+                                $('.discount-amount').text('-' + response.discountAmountFormatted);
+                                $('.discount-row').show();
+                            } else {
+                                $('#couponMessage').text(response.message).removeClass('text-success').addClass('text-danger');
+                                $('.discount-amount').text('0 ₺');
+                                $('.discount-row').hide();
+                            }
+
+                            // Fiyatları güncelle
+                            $('.subtotal-price').text(response.subtotalFormatted);
+                            $('.total-price').text(response.totalAfterDiscountFormatted);
+                        },
+                        error: function () {
+                            $('#couponMessage').text('Kupon uygulanırken bir hata oluştu.').addClass('text-danger');
+                        }
+                    });
+                });
+
             });
-        }
-    }
+        </script>
 
-    $(document).on('click', '.btn-remove-item', function() {
-        removeItem(this);
-    });
 
-});
-</script>
+
+
+    
+

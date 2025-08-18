@@ -24,6 +24,8 @@ public partial class eCommerceDBContext : DbContext
 
     public virtual DbSet<CouponUsage> CouponUsages { get; set; }
 
+    public virtual DbSet<EmailSetting> EmailSettings { get; set; }
+
     public virtual DbSet<Order> Orders { get; set; }
 
     public virtual DbSet<OrderItem> OrderItems { get; set; }
@@ -80,7 +82,18 @@ public partial class eCommerceDBContext : DbContext
             entity.ToTable("CouponUsage");
 
             entity.Property(e => e.UsedAt).HasColumnType("datetime");
-            entity.Property(e => e.UserId).HasMaxLength(450);
+        });
+
+        modelBuilder.Entity<EmailSetting>(entity =>
+        {
+            entity.HasNoKey();
+
+            entity.Property(e => e.FromEmail).HasMaxLength(255);
+            entity.Property(e => e.FromName).HasMaxLength(255);
+            entity.Property(e => e.Host).HasMaxLength(255);
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Password).HasMaxLength(255);
+            entity.Property(e => e.Username).HasMaxLength(255);
         });
 
         modelBuilder.Entity<Order>(entity =>

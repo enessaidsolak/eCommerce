@@ -113,73 +113,64 @@ namespace eCommerce.Controllers
             Response.Cookies.Append("cart", JsonSerializer.Serialize(cartItems), options);
         }
         [HttpPost]
-        public IActionResult ApplyCoupon(string couponCode)
+        public JsonResult ApplyCouponAjax(string couponCode)
         {
-            var cartItems = GetCartItemsFromCookie(); // Sepetteki ürünleri al
+            var cartItems = GetCartItemsFromCookie();
             decimal subtotal = cartItems.Sum(x => x.Price * x.Quantity);
             decimal shipping = 3m;
+            decimal discountAmount = 0;
+            string message = "";
+            bool success = false;
+
+            int userId = Convert.ToInt32(User.FindFirstValue("UserId"));
+
 
             var coupon = _context.Coupons.FirstOrDefault(c => c.Code == couponCode && c.IsActive);
-
-            decimal discountAmount = 0;
-            string couponMessage = null;
-
-            // Kullanıcının kimliği (login sistemin varsa bu şekilde alırsın)
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            // Login yoksa geçici bir kullanıcı ID'si de verebilirsin:
-            // string userId = "test-user";
-
             if (coupon == null)
             {
-                couponMessage = "Geçersiz kupon kodu.";
+                message = "Geçersiz kupon kodu.";
             }
             else if (coupon.ExpiryDate.HasValue && coupon.ExpiryDate.Value < DateTime.Now)
             {
-                couponMessage = "Kuponun süresi dolmuş.";
+                message = "Kupon süresi dolmuş.";
+            }
+            else if (_context.CouponUsages.Any(x => x.CouponId == coupon.Id && x.UserId == userId))
+            {
+                message = "Bu kuponu daha önce kullandınız.";
             }
             else
             {
-                var alreadyUsed = _context.CouponUsages
-                    .Any(x => x.CouponId == coupon.Id && x.UserId == userId);
+                discountAmount = subtotal * (coupon.DiscountRate / 100m);
 
-                if (alreadyUsed)
-                {
-                    couponMessage = "Bu kuponu daha önce kullandınız.";
-                }
-                else if (coupon.UsageLimit > 0 && coupon.UsageCount >= coupon.UsageLimit)
-                {
-                    couponMessage = "Bu kuponun kullanım limiti doldu.";
-                }
-                else
-                {
-                    discountAmount = subtotal * coupon.DiscountRate;
 
-                    // Kullanımı kaydet
-                    coupon.UsageCount++;
-                    _context.CouponUsages.Add(new CouponUsage
-                    {
-                        CouponId = coupon.Id,
-                        UserId = userId,
-                        UsedAt = DateTime.Now
-                    });
-                    _context.SaveChanges();
-                }
+                // Kullanım kaydı ekle
+                _context.CouponUsages.Add(new CouponUsage
+                {
+                    CouponId = coupon.Id,
+                    UserId = userId,
+                    UsedAt = DateTime.Now
+                });
+
+                _context.SaveChanges();
+
+                message = $"Kupon uygulandı. %{coupon.DiscountRate} indirim kazandınız!";
+
+                success = true;
             }
 
-            ViewBag.DiscountAmount = discountAmount;
-            ViewBag.CouponMessage = couponMessage;
-            ViewBag.TotalAfterDiscount = subtotal - discountAmount + shipping;
-
-            return View("Index", cartItems); // Sepet sayfasına geri dön
+            return Json(new
+            {
+                success = success,
+                message = message,
+                discountAmountFormatted = discountAmount.ToString("C", new System.Globalization.CultureInfo("tr-TR")),
+                subtotalFormatted = subtotal.ToString("C", new System.Globalization.CultureInfo("tr-TR")),
+                totalAfterDiscountFormatted = (subtotal - discountAmount + shipping).ToString("C", new System.Globalization.CultureInfo("tr-TR"))
+            });
         }
 
-        [HttpGet]
-        public IActionResult GetBasketSize()
-        {
-            var cartItems = GetCartItemsFromCookie();
-            var totalCount = cartItems.Sum(x => x.Quantity);
-            return Json(totalCount);
-        }
+
+
+
 
 
 

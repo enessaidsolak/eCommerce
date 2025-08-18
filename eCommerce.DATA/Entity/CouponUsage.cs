@@ -9,7 +9,7 @@ public partial class CouponUsage
 
     public int CouponId { get; set; }
 
-    public string UserId { get; set; } = null!;
+    public int UserId { get; set; }
 
     public DateTime UsedAt { get; set; }
 }
