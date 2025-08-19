@@ -113,17 +113,17 @@ namespace eCommerce.Controllers
             Response.Cookies.Append("cart", JsonSerializer.Serialize(cartItems), options);
         }
         [HttpPost]
+        [HttpPost]
         public JsonResult ApplyCouponAjax(string couponCode)
         {
             var cartItems = GetCartItemsFromCookie();
             decimal subtotal = cartItems.Sum(x => x.Price * x.Quantity);
-            decimal shipping = 3m;
+            decimal shipping = subtotal >= 300 ? 0m : 3m; // Kargo durumu
             decimal discountAmount = 0;
             string message = "";
             bool success = false;
 
             int userId = Convert.ToInt32(User.FindFirstValue("UserId"));
-
 
             var coupon = _context.Coupons.FirstOrDefault(c => c.Code == couponCode && c.IsActive);
             if (coupon == null)
@@ -142,7 +142,6 @@ namespace eCommerce.Controllers
             {
                 discountAmount = subtotal * (coupon.DiscountRate / 100m);
 
-
                 // Kullanım kaydı ekle
                 _context.CouponUsages.Add(new CouponUsage
                 {
@@ -154,7 +153,6 @@ namespace eCommerce.Controllers
                 _context.SaveChanges();
 
                 message = $"Kupon uygulandı. %{coupon.DiscountRate} indirim kazandınız!";
-
                 success = true;
             }
 
@@ -167,6 +165,7 @@ namespace eCommerce.Controllers
                 totalAfterDiscountFormatted = (subtotal - discountAmount + shipping).ToString("C", new System.Globalization.CultureInfo("tr-TR"))
             });
         }
+
 
 
 

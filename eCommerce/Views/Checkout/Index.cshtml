@@ -1,0 +1,187 @@
+﻿@model eCommerce.WEB.Models.CheckoutViewModel
+@using eCommerce.WEB.Models
+
+<!-- Page Header Start -->
+<div class="container-fluid page-header py-5">
+    <h1 class="text-center text-white display-6">Ödeme</h1>
+    <ol class="breadcrumb justify-content-center mb-0">
+        <li class="breadcrumb-item"><a href="#">Anasayfa</a></li>
+        <li class="breadcrumb-item"><a href="#">Sayfalar</a></li>
+        <li class="breadcrumb-item active text-white">Ödeme</li>
+    </ol>
+</div>
+<!-- Page Header End -->
+<div class="container-fluid py-5">
+    <div class="container py-5">
+        <h1 class="mb-4">Fatura Ayrıntıları</h1>
+
+        <form asp-action="PlaceOrder" method="post">
+            <div class="row g-5">
+                <!-- Sol: Adres -->
+                <div class="col-md-12 col-lg-6 col-xl-7">
+                    @if (Model.SavedAddresses.Any())
+                    {
+                        <label for="SelectedAddressId" class="form-label">Adresinizi Seçin veya Yeni Adres Ekleyin</label>
+                        <div class="d-flex mb-3">
+                            <select asp-for="SelectedAddressId" class="form-select" id="SelectedAddressId">
+                                <option value="0">Yeni Adres Ekle</option>
+                                @foreach (var a in Model.SavedAddresses)
+                                {
+                                    <option value="@a.Id">@a.FullName - @a.AddressLine, @a.City</option>
+                                }
+                            </select>
+                            <button type="button" class="btn btn-danger ms-2" id="deleteAddressBtn">Sil</button>
+                        </div>
+                    }
+
+                   
+
+                    <div id="addressFormFields">
+                        <input asp-for="FirstName" class="form-control mb-3" placeholder="Ad" />
+                        <input asp-for="LastName" class="form-control mb-3" placeholder="Soyad" />
+                        <input asp-for="CompanyName" class="form-control mb-3" placeholder="Firma Adı" />
+                        <input asp-for="AddressLine" class="form-control mb-3" placeholder="Adres" />
+                        <input asp-for="City" class="form-control mb-3" placeholder="Kasaba/Şehir" />
+                        <input asp-for="Country" class="form-control mb-3" placeholder="Ülke" />
+                        <input asp-for="Postcode" class="form-control mb-3" placeholder="Posta Kodu" />
+                        <input asp-for="Mobile" class="form-control mb-3" placeholder="Telefon Numarası" />
+                        <input asp-for="Email" class="form-control mb-3" placeholder="Email" />
+                    </div>
+
+                  
+
+                   
+
+                    <textarea asp-for="OrderNotes" class="form-control mb-3" placeholder="Sipariş Notları (İsteğe Bağlı)"></textarea>
+                </div>
+
+                <!-- Sağ: Sepet ve Ödeme -->
+                <div class="col-md-12 col-lg-6 col-xl-5">
+                    <div class="table-responsive mb-4">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Ürün</th>
+                                    <th>İsim</th>
+                                    <th>Fiyat</th>
+                                    <th>Adet</th>
+                                    <th>Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.CartItems)
+                                {
+                                    <tr>
+                                        <td><img src="@item.ImageUrl" style="width:80px;height:80px;object-fit:cover;" /></td>
+                                        <td>@item.Name</td>
+                                        <td>@(item.Price.ToString("C", new System.Globalization.CultureInfo("tr-TR")))</td>
+                                        <td>@item.Quantity</td>
+                                        <td>@((item.Price * item.Quantity).ToString("C", new System.Globalization.CultureInfo("tr-TR")))</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td colspan="4">Ara Toplam</td>
+                                    <td>@(Model.Subtotal.ToString("C", new System.Globalization.CultureInfo("tr-TR")))</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">Kargo</td>
+                                    <td>@(Model.ShippingCost.ToString("C", new System.Globalization.CultureInfo("tr-TR")))</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4"><strong>TOPLAM</strong></td>
+                                    <td><strong>@(Model.Total.ToString("C", new System.Globalization.CultureInfo("tr-TR")))</strong></td>
+                                </tr>
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                    <h5>Kargo Seçenekleri</h5>
+                    <div class="form-check">
+                        <input asp-for="ShippingOption" class="form-check-input" type="radio" value="FreeShipping" id="Shipping-1" checked />
+                        <label class="form-check-label" for="Shipping-1">
+                            @(Model.Subtotal >= 300 ? "300 TL Üzeri Ücretsiz Kargo" : "Kargo: 3,00 ₺")
+                        </label>
+                    </div>
+
+                    
+
+
+                    <h5 class="mt-3">Ödeme Yöntemi</h5>
+                    <div class="form-check">
+                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="BankTransfer" id="Payment-1" />
+                        <label class="form-check-label" for="Payment-1">Banka Transferi</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="CheckPayments" id="Payment-2" />
+                        <label class="form-check-label" for="Payment-2">Çek ile Ödeme</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="CashOnDelivery" id="Payment-3" />
+                        <label class="form-check-label" for="Payment-3">Kapıda Ödeme</label>
+                    </div>
+                    <div class="form-check">
+                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="Paypal" id="Payment-4" />
+                        <label class="form-check-label" for="Payment-4">Paypal</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Sipariş Ver</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const select = document.getElementById('SelectedAddressId');
+            const formFields = document.getElementById('addressFormFields');
+
+            // Adres formunu göster/gizle
+            if (select) {
+                const toggleFields = () => {
+                    formFields.style.display = (select.value == "0") ? "block" : "none";
+                };
+                toggleFields();
+                select.addEventListener('change', toggleFields);
+            }
+
+            // Adres silme işlemi
+            const deleteBtn = document.getElementById("deleteAddressBtn");
+            if (deleteBtn) {
+                deleteBtn.addEventListener("click", function () {
+                    if (!select) return;
+
+                    const addressId = select.value;
+
+                    if (addressId == "0") {
+                        alert("Yeni adres seçili, silinemez!");
+                        return;
+                    }
+
+                    if (confirm("Bu adresi silmek istediğinize emin misiniz?")) {
+                        fetch('/Checkout/DeleteAddress', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                            },
+                            body: JSON.stringify(addressId)
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert("Adres silindi.");
+                                    location.reload(); // sayfa yenilensin
+                                } else {
+                                    alert(data.message || "Adres silinemedi!");
+                                }
+                            });
+                    }
+                });
+            }
+        });
+    </script>
+}
+

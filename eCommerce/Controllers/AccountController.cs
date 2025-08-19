@@ -246,5 +246,6 @@ public IActionResult ForgotPassword(ForgotPasswordViewModel model)
         return Content("Şifreler hash'lendi.");
     }
 
+
     
 }

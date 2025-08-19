@@ -1,6 +1,5 @@
 ﻿@model List<CartItemModel>
 
-
 <!-- Single Page Header start -->
 <div class="container-fluid page-header py-5">
     <h1 class="text-center text-white display-6">Sepet</h1>
@@ -11,6 +10,7 @@
     </ol>
 </div>
 <!-- Single Page Header End -->
+
 <!-- Cart Page Start -->
 <div class="container-fluid py-5">
     <div class="container py-5">
@@ -71,9 +71,11 @@
                 </tbody>
             </table>
         </div>
+
+        @* Subtotal ve kargo hesaplama *@
         @{
             decimal subtotal = Model.Sum(x => x.Price * x.Quantity);
-            decimal shipping = 3;
+            decimal shipping = subtotal >= 300 ? 0 : 3;
             decimal discountAmount = ViewBag.DiscountAmount != null ? (decimal)ViewBag.DiscountAmount : 0;
             decimal totalAfterDiscount = subtotal - discountAmount + shipping;
         }
@@ -112,7 +114,7 @@
                         <!-- Shipping -->
                         <div class="d-flex justify-content-between mb-2">
                             <h5 class="mb-0 me-4">Kargo Ücreti:</h5>
-                            <p class="mb-0">₺3,00</p>
+                            <p class="mb-0 shipping-price">@((shipping > 0) ? shipping.ToString("C", new System.Globalization.CultureInfo("tr-TR")) : "Ücretsiz")</p>
                         </div>
                         <p class="mb-0 text-end">Türkiyeye kargo.</p>
                     </div>
@@ -122,7 +124,12 @@
                         <p class="mb-0 total-price">@totalAfterDiscount.ToString("C", new System.Globalization.CultureInfo("tr-TR"))</p>
                     </div>
 
-                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" type="button">Ödeme işlemine devam et </button>
+                    <button class="btn border-secondary rounded-pill px-4 py-3 text-primary text-uppercase mb-4 ms-4" 
+                        type="button" 
+                        onclick="location.href='@Url.Action("Index", "Checkout")'">
+                        Ödeme işlemine devam et
+                    </button>
+
                 </div>
             </div>
         </div>
@@ -151,7 +158,13 @@
                     $('.subtotal-price').text(formatCurrency(subtotal));
 
                     var discount = parseCurrency($('.discount-amount').text()) || 0;
-                    $('.total-price').text(formatCurrency(subtotal - discount + 3));
+
+                    // Kargo hesaplama: 300 TL üzeri ücretsiz
+                    var shippingCost = subtotal >= 300 ? 0 : 3;
+                    $('.shipping-price').text(shippingCost > 0 ? formatCurrency(shippingCost) : "Ücretsiz");
+
+                    var total = subtotal - discount + shippingCost;
+                    $('.total-price').text(formatCurrency(total));
                 }
 
                 function handleBasketSize() {
@@ -204,9 +217,7 @@
                     removeItem(this);
                 });
 
-                // ----------------------------
                 // Kupon Formu Ajax Gönderimi
-                // ----------------------------
                 $('#couponForm').submit(function (e) {
                     e.preventDefault();
                     var couponCode = $('#couponCode').val();
@@ -228,8 +239,13 @@
                             }
 
                             // Fiyatları güncelle
+                            var subtotalParsed = parseFloat(response.subtotal.replace('₺','').replace('.','').replace(',','.'));
+                            var discountParsed = parseFloat($('.discount-amount').text().replace('₺','').replace('.','').replace(',','.')) || 0;
+                            var shippingCost = subtotalParsed >= 300 ? 0 : 3;
+                            $('.shipping-price').text(shippingCost > 0 ? formatCurrency(shippingCost) : "Ücretsiz");
+
                             $('.subtotal-price').text(response.subtotalFormatted);
-                            $('.total-price').text(response.totalAfterDiscountFormatted);
+                            $('.total-price').text(formatCurrency(subtotalParsed - discountParsed + shippingCost));
                         },
                         error: function () {
                             $('#couponMessage').text('Kupon uygulanırken bir hata oluştu.').addClass('text-danger');
@@ -239,9 +255,3 @@
 
             });
         </script>
-
-
-
-
-    
-

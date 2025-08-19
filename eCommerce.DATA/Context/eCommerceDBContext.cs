@@ -46,10 +46,13 @@ public partial class eCommerceDBContext : DbContext
         {
             entity.HasKey(e => e.AddressId).HasName("PK__Addresse__091C2A1B5B10EAF4");
 
+            entity.ToTable("Address");
+
             entity.Property(e => e.AddressId).HasColumnName("AddressID");
             entity.Property(e => e.AddressLine).HasMaxLength(255);
             entity.Property(e => e.City).HasMaxLength(100);
             entity.Property(e => e.Country).HasMaxLength(100);
+            entity.Property(e => e.Mobile).HasMaxLength(50);
             entity.Property(e => e.PostalCode).HasMaxLength(20);
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
