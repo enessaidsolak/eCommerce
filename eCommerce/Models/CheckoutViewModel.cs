@@ -10,31 +10,15 @@ namespace eCommerce.WEB.Models
         public int SelectedAddressId { get; set; }
 
         // Fatura alanları
-        [Required(ErrorMessage = "Ad alanı zorunludur.")]
-        public string FirstName { get; set; } = null!;
-
-        [Required(ErrorMessage = "Soyad alanı zorunludur.")]
-        public string LastName { get; set; } = null!;
-
+        [Required] public string FirstName { get; set; } = null!;
+        [Required] public string LastName { get; set; } = null!;
         public string CompanyName { get; set; } = "";
-
-        [Required(ErrorMessage = "Adres alanı zorunludur.")]
-        public string AddressLine { get; set; } = null!;
-
-        [Required(ErrorMessage = "Şehir alanı zorunludur.")]
-        public string City { get; set; } = null!;
-
-        [Required(ErrorMessage = "Ülke alanı zorunludur.")]
-        public string Country { get; set; } = null!;
-
-        [Required(ErrorMessage = "Posta kodu zorunludur.")]
-        public string Postcode { get; set; } = null!;
-
-        [Required(ErrorMessage = "Telefon numarası zorunludur.")]
-        public string Mobile { get; set; } = null!;
-
-        [Required(ErrorMessage = "Email alanı zorunludur.")]
-        public string Email { get; set; } = null!;
+        [Required] public string AddressLine { get; set; } = null!;
+        [Required] public string City { get; set; } = null!;
+        [Required] public string Country { get; set; } = null!;
+        [Required] public string Postcode { get; set; } = null!;
+        [Required] public string Mobile { get; set; } = null!;
+        [Required] public string Email { get; set; } = null!;
 
         public bool CreateAccount { get; set; }
         public bool ShipToDifferentAddress { get; set; }
@@ -44,17 +28,15 @@ namespace eCommerce.WEB.Models
         public List<CartItemModel> CartItems { get; set; } = new List<CartItemModel>();
 
         // Kargo & Ödeme
-        [Required(ErrorMessage = "Kargo seçimi zorunludur.")]
-        public string ShippingOption { get; set; } = null!;
+        [Required] public string ShippingOption { get; set; } = null!;
+        [Required] public string PaymentMethod { get; set; } = null!;
 
-        [Required(ErrorMessage = "Ödeme yöntemi zorunludur.")]
-        public string PaymentMethod { get; set; } = null!;
-
-        public string CardHolderName { get; set; } = "";
-        public string CardNumber { get; set; } = "";
-        public string ExpireMonth { get; set; } = "";
-        public string ExpireYear { get; set; } = "";
-        public string Cvc { get; set; } = "";
+        // Craftgate kredi kartı alanları
+        [Required] public string CardHolderName { get; set; } = null!;
+        [Required] public string CardNumber { get; set; } = null!;
+        [Required] public string ExpireMonth { get; set; } = null!;
+        [Required] public string ExpireYear { get; set; } = null!;
+        [Required] public string Cvc { get; set; } = null!;
 
         // Toplamlar
         public decimal Subtotal { get; set; }
