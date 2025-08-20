@@ -108,6 +108,7 @@ public partial class eCommerceDBContext : DbContext
             entity.Property(e => e.OrderDate)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
+            entity.Property(e => e.PaymentId).HasColumnName("PaymentID");
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasDefaultValue("Hazırlanıyor");
@@ -116,7 +117,7 @@ public partial class eCommerceDBContext : DbContext
 
             entity.HasOne(d => d.Address).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.AddressId)
-                .HasConstraintName("FK__Orders__AddressI__6B24EA82");
+                .HasConstraintName("FK_Orders_Address1");
 
             entity.HasOne(d => d.User).WithMany(p => p.Orders)
                 .HasForeignKey(d => d.UserId)
