@@ -11,6 +11,7 @@
     </ol>
 </div>
 <!-- Page Header End -->
+
 <div class="container-fluid py-5">
     <div class="container py-5">
         <h1 class="mb-4">Fatura Ayrıntıları</h1>
@@ -19,40 +20,53 @@
             <div class="row g-5">
                 <!-- Sol: Adres -->
                 <div class="col-md-12 col-lg-6 col-xl-7">
-                    @if (Model.SavedAddresses.Any())
-                    {
-                        <label for="SelectedAddressId" class="form-label">Adresinizi Seçin veya Yeni Adres Ekleyin</label>
-                        <div class="d-flex mb-3">
-                            <select asp-for="SelectedAddressId" class="form-select" id="SelectedAddressId">
-                                <option value="0">Yeni Adres Ekle</option>
-                                @foreach (var a in Model.SavedAddresses)
-                                {
-                                    <option value="@a.Id">@a.FullName - @a.AddressLine, @a.City</option>
-                                }
-                            </select>
-                            <button type="button" class="btn btn-danger ms-2" id="deleteAddressBtn">Sil</button>
-                        </div>
-                    }
+                  @if (Model.SavedAddresses != null)  
+{
+    <label for="SelectedAddressId" class="form-label">Adresinizi Seçin veya Yeni Adres Ekleyin</label>
+    <div class="d-flex mb-3">
+        <select asp-for="SelectedAddressId" class="form-select" id="SelectedAddressId">
+            <option value="0">Yeni Adres Ekle</option>
+            @foreach (var a in Model.SavedAddresses)
+            {
+                <option value="@a.Id">@a.FullName - @a.AddressLine, @a.City</option>
+            }
+        </select>
+        <button type="button" class="btn btn-danger ms-2" id="deleteAddressBtn">Sil</button>
+        <button type="button" class="btn btn-success ms-2" id="addAddressBtn">Kaydet</button>
+    </div>
+}
 
-                   
 
                     <div id="addressFormFields">
                         <input asp-for="FirstName" class="form-control mb-3" placeholder="Ad" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+
                         <input asp-for="LastName" class="form-control mb-3" placeholder="Soyad" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+
                         <input asp-for="CompanyName" class="form-control mb-3" placeholder="Firma Adı" />
+
                         <input asp-for="AddressLine" class="form-control mb-3" placeholder="Adres" />
+                        <span asp-validation-for="AddressLine" class="text-danger"></span>
+
                         <input asp-for="City" class="form-control mb-3" placeholder="Kasaba/Şehir" />
+                        <span asp-validation-for="City" class="text-danger"></span>
+
                         <input asp-for="Country" class="form-control mb-3" placeholder="Ülke" />
+                        <span asp-validation-for="Country" class="text-danger"></span>
+
                         <input asp-for="Postcode" class="form-control mb-3" placeholder="Posta Kodu" />
+                        <span asp-validation-for="Postcode" class="text-danger"></span>
+
                         <input asp-for="Mobile" class="form-control mb-3" placeholder="Telefon Numarası" />
+                        <span asp-validation-for="Mobile" class="text-danger"></span>
+
                         <input asp-for="Email" class="form-control mb-3" placeholder="Email" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
                     </div>
 
-                  
+                    <textarea asp-for="OrderNotes" class="form-control mb-3" placeholder="Sipariş Notları (İsteğe Bağlı)" data-val="false"></textarea>
 
-                   
-
-                    <textarea asp-for="OrderNotes" class="form-control mb-3" placeholder="Sipariş Notları (İsteğe Bağlı)"></textarea>
                 </div>
 
                 <!-- Sağ: Sepet ve Ödeme -->
@@ -92,7 +106,6 @@
                                     <td><strong>@(Model.Total.ToString("C", new System.Globalization.CultureInfo("tr-TR")))</strong></td>
                                 </tr>
                             </tbody>
-
                         </table>
                     </div>
 
@@ -104,27 +117,6 @@
                         </label>
                     </div>
 
-                    
-
-
-                    <h5 class="mt-3">Ödeme Yöntemi</h5>
-                    <div class="form-check">
-                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="BankTransfer" id="Payment-1" />
-                        <label class="form-check-label" for="Payment-1">Banka Transferi</label>
-                    </div>
-                    <div class="form-check">
-                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="CheckPayments" id="Payment-2" />
-                        <label class="form-check-label" for="Payment-2">Çek ile Ödeme</label>
-                    </div>
-                    <div class="form-check">
-                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="CashOnDelivery" id="Payment-3" />
-                        <label class="form-check-label" for="Payment-3">Kapıda Ödeme</label>
-                    </div>
-                    <div class="form-check">
-                        <input asp-for="PaymentMethod" class="form-check-input" type="radio" value="Paypal" id="Payment-4" />
-                        <label class="form-check-label" for="Payment-4">Paypal</label>
-                    </div>
-
                     <button type="submit" class="btn btn-primary w-100 mt-3">Sipariş Ver</button>
                 </div>
             </div>
@@ -133,52 +125,98 @@
 </div>
 
 @section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.3/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        $(document).ready(function () {
+            // Form doğrulama
+            $("form[asp-action='PlaceOrder']").validate({
+                highlight: function (element) { $(element).addClass('is-invalid'); },
+                unhighlight: function (element) { $(element).removeClass('is-invalid'); },
+                errorClass: 'text-danger',
+                errorPlacement: function (error, element) { error.insertAfter(element); },
+                ignore: "[name='OrderNotes']"
+            });
+
             const select = document.getElementById('SelectedAddressId');
             const formFields = document.getElementById('addressFormFields');
 
             // Adres formunu göster/gizle
             if (select) {
-                const toggleFields = () => {
-                    formFields.style.display = (select.value == "0") ? "block" : "none";
-                };
+                const toggleFields = () => { formFields.style.display = (select.value == "0") ? "block" : "none"; };
                 toggleFields();
                 select.addEventListener('change', toggleFields);
             }
 
-            // Adres silme işlemi
+            // Adres silme
             const deleteBtn = document.getElementById("deleteAddressBtn");
             if (deleteBtn) {
                 deleteBtn.addEventListener("click", function () {
                     if (!select) return;
-
                     const addressId = select.value;
+                    if (addressId == "0") { alert("Yeni adres seçili, silinemez!"); return; }
+                    if (!confirm("Bu adresi silmek istediğinize emin misiniz?")) return;
 
-                    if (addressId == "0") {
-                        alert("Yeni adres seçili, silinemez!");
-                        return;
-                    }
+                    fetch('/Checkout/DeleteAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify(addressId)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Adres silindi.");
+                            const optionToRemove = select.querySelector(`option[value='${addressId}']`);
+                            if(optionToRemove) optionToRemove.remove();
+                            select.value = "0"; // Yeni adres eklemeye geç
+                            formFields.style.display = "block";
+                        } else {
+                            alert(data.message || "Adres silinemedi!");
+                        }
+                    });
+                });
+            }
 
-                    if (confirm("Bu adresi silmek istediğinize emin misiniz?")) {
-                        fetch('/Checkout/DeleteAddress', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                            },
-                            body: JSON.stringify(addressId)
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    alert("Adres silindi.");
-                                    location.reload(); // sayfa yenilensin
-                                } else {
-                                    alert(data.message || "Adres silinemedi!");
-                                }
-                            });
-                    }
+            // Adres ekleme
+            const addBtn = document.getElementById("addAddressBtn");
+            if (addBtn) {
+                addBtn.addEventListener("click", function () {
+                    const model = {
+                        AddressLine: $("#AddressLine").val(),
+                        City: $("#City").val(),
+                        Country: $("#Country").val(),
+                        Postcode: $("#Postcode").val(),
+                        Mobile: $("#Mobile").val()
+                    };
+
+                    fetch('/Checkout/AddAddress', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                        },
+                        body: JSON.stringify(model)
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Adres kaydedildi.");
+                            // Dropdown'a yeni adres ekle
+                            const newOption = document.createElement("option");
+                            newOption.value = data.id;
+                            newOption.text = model.AddressLine + ", " + model.City;
+                            select.appendChild(newOption);
+                            select.value = data.id; // yeni adres seçili
+                            formFields.style.display = "none"; // formu gizle
+                        } else {
+                            alert(data.message || "Adres kaydedilemedi!");
+                        }
+                    });
                 });
             }
         });

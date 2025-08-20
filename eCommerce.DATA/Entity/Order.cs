@@ -17,6 +17,10 @@ public partial class Order
 
     public string? Status { get; set; }
 
+    public string? PaymentId { get; set; }
+
+    public bool? IsActive { get; set; }
+
     public virtual Address? Address { get; set; }
 
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
